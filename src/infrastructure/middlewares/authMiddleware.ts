@@ -36,7 +36,7 @@ interface AuthRequest extends Request {
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        res.status(403).json({ message: 'Token required' });
+        res.status(403).json({ message: 'Authorization token is missing' });
         return;
     }
 
@@ -45,7 +45,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
         req.user = decoded as { id_usuario: string; tipo: string };
         next();
     } catch (error) {
-        res.status(403).json({ message: 'Invalid token' });
+        res.status(403).json({ message: 'Invalid or expired token' });
     }
 };
 
@@ -58,9 +58,25 @@ export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction): vo
     next();
 };
 
+// Middleware para verificar si el usuario es un Padre
+export const isPadre = (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.user || req.user.tipo !== 'Padre') {
+        res.status(403).json({ message: 'Solo acceso para usuarios de tipo Padre' });
+        return;
+    }
+    next();
+};
+
 // Middleware combinado para autenticación y verificación de administrador
 export const adminOnlyMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
     authMiddleware(req, res, () => {
         isAdmin(req, res, next);
+    });
+};
+
+// Middleware combinado para autenticación y verificación de Padre
+export const padreOnlyMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
+    authMiddleware(req, res, () => {
+        isPadre(req, res, next);
     });
 };

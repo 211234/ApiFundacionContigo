@@ -6,9 +6,10 @@ export class RegisterDocenteController {
     constructor(private registerDocenteUseCase: RegisterDocenteUseCase) { }
 
     async handle(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const docenteDTO: RegisterDocenteDTO = req.body;
+        
 
         try {
+            const docenteDTO: RegisterDocenteDTO = req.body;
             const docente = await this.registerDocenteUseCase.execute(docenteDTO);
             res.status(201).json({ docente });
         } catch (error) {
