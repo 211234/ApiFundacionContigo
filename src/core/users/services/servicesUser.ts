@@ -43,8 +43,9 @@ export class UserService {
 
         // Actualizar los campos que se pueden modificar
         user.nombre = updateUserDTO.nombre || user.nombre;
+        user.correo = updateUserDTO.correo || user.correo
         user.contraseña = updateUserDTO.contraseña ? await this.hashPassword(updateUserDTO.contraseña) : user.contraseña;
-        user.tipo = updateUserDTO.tipo || user.tipo;
+        user.telefono = updateUserDTO.telefono || user.telefono;
 
         return await this.userRepository.updateUser(id, user);
     }

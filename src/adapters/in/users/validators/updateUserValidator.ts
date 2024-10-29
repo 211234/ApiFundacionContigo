@@ -22,11 +22,6 @@ export const updateUserValidator = [
         .optional()
         .isNumeric()
         .withMessage('El teléfono debe contener solo números')
-        .isLength({ min: 10, max: 15 })
+        .isLength({ max: 10 })
         .withMessage('El teléfono debe tener entre 10 y 15 dígitos'),
-
-    body('tipo')
-        .optional()
-        .isIn(['Administrador', 'Padre', 'Docente'])
-        .withMessage('El tipo de usuario debe ser Administrador, Padre o Docente')
 ];

@@ -3,5 +3,4 @@ export interface UpdateUserDTO {
     correo?: string;
     contraseña?: string;
     telefono?: string;
-    tipo?: 'Administrador' | 'Padre' | 'Docente';
 }
