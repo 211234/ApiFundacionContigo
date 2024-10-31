@@ -17,10 +17,10 @@ import { UpdateDocenteController } from './controllers/updateDocenteController';
 
 // Importaciones específicas para Niño
 import { RegisterHijoUseCase } from '../../../application/users/use-cases/registerHijoUseCase';
-import { RegisterNiñoController } from './controllers/registerHijoController';
+import { RegisterHijoController } from './controllers/registerHijoController';
 import { HijoRepository } from '../../out/database/users/hijoRepository';
 import { UpdateHijoUseCase } from '../../../application/users/use-cases/updateHijoUseCase';
-import { UpdateNiñoController } from './controllers/updateHijoController';
+import { UpdateHijoController } from './controllers/updateHijoController';
 import { UpdateDocenteUseCase } from '../../../application/users/use-cases/updateDocenteUseCase';
 
 // Crear instancias de repositorio y servicio de usuario
@@ -40,8 +40,8 @@ const loginUserUseCase = new LoginUserUseCase(userRepository, userService);
 
 // Crear instancias de casos de uso específicos para docentes y niños
 const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository);
-const registerNiñoUseCase = new RegisterHijoUseCase(userRepository, hijoRepository);
-const updateNiñoUseCase = new UpdateHijoUseCase(hijoRepository);
+const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoRepository);
+const updateHijoUseCase = new UpdateHijoUseCase(hijoRepository);
 const updateDocenteUseCase = new UpdateDocenteUseCase(docenteRepository);
 
 // Crear instancias de controladores para cada caso de uso
@@ -53,6 +53,6 @@ export const loginUserController = new LoginUserController(loginUserUseCase);
 
 // Controlador para el registro de docentes y niños
 export const registerDocenteController = new RegisterDocenteController(registerDocenteUseCase);
-export const registerNiñoController = new RegisterNiñoController(registerNiñoUseCase);
-export const updateNiñoController = new UpdateNiñoController(updateNiñoUseCase);
+export const registerNiñoController = new RegisterHijoController(registerHijoUseCase);
+export const updateNiñoController = new UpdateHijoController(updateHijoUseCase);
 export const updateDocenteController = new UpdateDocenteController(updateDocenteUseCase);

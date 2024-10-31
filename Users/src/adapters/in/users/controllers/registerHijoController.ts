@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
-import { RegisterNiñoUseCase } from '../../../../application/users/use-cases/registerHijoUseCase';
-import { RegisterNiñoDTO } from '../dtos/registerHijoDto';
+import { RegisterHijoUseCase } from '../../../../application/users/use-cases/registerHijoUseCase';
+import { RegisterHijoDTO } from '../dtos/registerHijoDto';
 
-export class RegisterNiñoController {
-    constructor(private registerNiñoUseCase: RegisterNiñoUseCase) { }
+export class RegisterHijoController {
+    constructor(private registerNiñoUseCase: RegisterHijoUseCase) { }
 
     async handle(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const niñoDTO: RegisterNiñoDTO = req.body;
+        const hijoDTO: RegisterHijoDTO = req.body;
 
         try {
-            const niño = await this.registerNiñoUseCase.execute(niñoDTO);
-            res.status(201).json({ niño });
+            const hijo = await this.registerNiñoUseCase.execute(hijoDTO);
+            res.status(201).json({ hijo });
         } catch (error) {
             next(error);
         }
