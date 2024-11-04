@@ -2,6 +2,11 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { User } from '../../core/users/domain/userEntity';
 import { env } from '../config/env';
+import { UserAuditUseCase } from '../../application/users/use-cases/userAuditUseCase';
+import { UserService } from '../../core/users/services/servicesUser';
+import { AuditService } from '../../core/users/services/auditService';
+import { UserRepository } from '../../adapters/out/database/users/userRepository';
+import { AuditRepository } from '../../adapters/out/database/users/auditRepository';
 
 // Configuración de secreto JWT
 const secret = env.jwt.secret;
@@ -79,4 +84,33 @@ export const padreOnlyMiddleware = (req: AuthRequest, res: Response, next: NextF
     authMiddleware(req, res, () => {
         isPadre(req, res, next);
     });
+};
+
+// Instancia de `UserAuditUseCase` para evitar recrearla en cada solicitud
+const userAuditUseCase = new UserAuditUseCase(
+    new UserService(new UserRepository()),
+    new AuditService(new AuditRepository())
+);
+
+// Middleware de auditoría
+export const auditMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
+    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const id_usuario = req.user?.id_usuario;
+
+        if (id_usuario) {
+            try {
+                await userAuditUseCase.auditUserAction({
+                    id_usuario,
+                    accion,
+                    entidad_afectada: 'usuarios',
+                    id_entidad: id_usuario,
+                    descripcion: descripcionCallback(req),  // Descripción dinámica
+                });
+            } catch (error) {
+                console.error("Error registrando acción de auditoría:", error);
+            }
+        }
+
+        next();
+    };
 };

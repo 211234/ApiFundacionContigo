@@ -59,4 +59,12 @@ export class UserService {
 
         await this.userRepository.deleteUser(id);
     }
+
+    async loginUser(id: string): Promise<User | null> {
+        return await this.userRepository.findById(id); 
+    }
+    
+    async logoutUser(id: string): Promise<void> {
+        // Implementa la lógica para el logout si es necesario
+    }
 }

@@ -14,45 +14,57 @@ import { RegisterDocenteUseCase } from '../../../application/users/use-cases/reg
 import { RegisterDocenteController } from './controllers/registerDocenteController';
 import { DocenteRepository } from '../../out/database/users/docenteRepository';
 import { UpdateDocenteController } from './controllers/updateDocenteController';
-
-// Importaciones específicas para Niño
-import { RegisterHijoUseCase } from '../../../application/users/use-cases/registerHijoUseCase';
-import { RegisterHijoController } from './controllers/registerHijoController';
 import { HijoRepository } from '../../out/database/users/hijoRepository';
+import { RegisterHijoUseCase } from '../../../application/users/use-cases/registerHijoUseCase';
 import { UpdateHijoUseCase } from '../../../application/users/use-cases/updateHijoUseCase';
-import { UpdateHijoController } from './controllers/updateHijoController';
 import { UpdateDocenteUseCase } from '../../../application/users/use-cases/updateDocenteUseCase';
+import { RegisterHijoController } from './controllers/registerHijoController';
+import { UpdateHijoController } from './controllers/updateHijoController';
+import { AuditRepository } from '../../out/database/users/auditRepository';
+import { UserAuditUseCase } from '../../../application/users/use-cases/userAuditUseCase';
+import { AuditController } from './controllers/auditController';
+import { AuditService } from '../../../core/users/services/auditService';
 
-// Crear instancias de repositorio y servicio de usuario
+
+// Crear instancias de repositorios
 const userRepository = new UserRepository();
-const userService = new UserService(userRepository);
-
-// Crear instancias de repositorios y servicios de docentes y niños
 const docenteRepository = new DocenteRepository();
 const hijoRepository = new HijoRepository();
 
-// Crear instancias de casos de uso con sus respectivas dependencias
+// Crear instancias de servicios
+const userService = new UserService(userRepository);
+
+// Crear instancias de casos de uso
 const registerUserUseCase = new RegisterUserUseCase(userRepository, userService);
 const deleteUserUseCase = new DeleteUserUseCase(userRepository);
 const readUserUseCase = new ReadUserUseCase(userRepository);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
 const loginUserUseCase = new LoginUserUseCase(userRepository, userService);
 
-// Crear instancias de casos de uso específicos para docentes y niños
 const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository);
 const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoRepository);
 const updateHijoUseCase = new UpdateHijoUseCase(hijoRepository);
 const updateDocenteUseCase = new UpdateDocenteUseCase(docenteRepository);
 
-// Crear instancias de controladores para cada caso de uso
+// Crear instancias de controladores
 export const registerUserController = new RegisterUserController(registerUserUseCase);
 export const deleteUserController = new DeleteUserController(deleteUserUseCase);
 export const readUserController = new ReadUserController(readUserUseCase);
 export const updateUserController = new UpdateUserController(updateUserUseCase);
 export const loginUserController = new LoginUserController(loginUserUseCase);
 
-// Controlador para el registro de docentes y niños
 export const registerDocenteController = new RegisterDocenteController(registerDocenteUseCase);
 export const registerNiñoController = new RegisterHijoController(registerHijoUseCase);
 export const updateNiñoController = new UpdateHijoController(updateHijoUseCase);
 export const updateDocenteController = new UpdateDocenteController(updateDocenteUseCase);
+
+// Instancia del repositorio de auditoría
+const auditRepository = new AuditRepository();
+// Crear instancia de servicio de auditoría
+const auditService = new AuditService(auditRepository);
+
+// Caso de uso de auditoría
+const userAuditUseCase = new UserAuditUseCase(userService, auditService);
+
+// Controlador de auditoría
+export const auditController = new AuditController(auditService);
