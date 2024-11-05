@@ -31,6 +31,12 @@ const userRepository = new UserRepository();
 const docenteRepository = new DocenteRepository();
 const hijoRepository = new HijoRepository();
 
+// Instancia del repositorio de auditoría
+const auditRepository = new AuditRepository();
+
+// Crear instancia de servicio de auditoría
+const auditService = new AuditService(auditRepository);
+
 // Crear instancias de servicios
 const userService = new UserService(userRepository);
 
@@ -41,15 +47,10 @@ const readUserUseCase = new ReadUserUseCase(userRepository);
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
 const loginUserUseCase = new LoginUserUseCase(userRepository, userService);
 
-const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository);
-const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoRepository);
+const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository, auditService);
+const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoRepository, auditService);
 const updateHijoUseCase = new UpdateHijoUseCase(hijoRepository);
 const updateDocenteUseCase = new UpdateDocenteUseCase(docenteRepository);
-
-// Instancia del repositorio de auditoría
-const auditRepository = new AuditRepository();
-// Crear instancia de servicio de auditoría
-const auditService = new AuditService(auditRepository);
 
 // Caso de uso de auditoría
 const userAuditUseCase = new UserAuditUseCase(userService, auditService);

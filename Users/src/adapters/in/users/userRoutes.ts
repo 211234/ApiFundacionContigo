@@ -48,28 +48,38 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// Rutas de usuarios
-router.post('/v1/register', registerUserValidator, validateResults, (req: Request, res: Response, next: NextFunction) =>
-    registerUserController.handle(req, res, next)
+// Ruta para el registro de usuarios (auditada)
+router.post('/v1/register',
+    registerUserValidator,
+    validateResults,
+    auditMiddleware('REGISTER_USER', (req: AuthRequest) => `Registro de usuario con correo ${req.body.correo}`),
+    (req: Request, res: Response, next: NextFunction) =>
+        registerUserController.handle(req, res, next)
 );
 
-router.post(
-    '/v1/login', 
-    loginLimiter, 
-    auditMiddleware('LOGIN', (req: AuthRequest) => `El usuario con correo ${req.body.correo} inicio sesión`), 
-    (req: Request, res: Response, next: NextFunction) => loginUserController.handle(req, res, next)
+// Ruta de inicio de sesión (auditada)
+router.post('/v1/login',
+    loginLimiter,
+    auditMiddleware('LOGIN', (req: AuthRequest) => `Inicio de sesión para usuario con correo ${req.body.correo}`),
+    (req: Request, res: Response, next: NextFunction) =>
+        loginUserController.handle(req, res, next)
 );
 
-router.delete(
-    '/v1/users/:id_usuario',
+// Ruta para eliminación de usuario (auditada)
+router.delete('/v1/users/:id_usuario',
     authMiddleware,
     isAdmin,
-    auditMiddleware('DELETE_USER', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} eliminó el usuario con ID ${req.params.id_usuario}`),
-    (req: AuthRequest, res: Response, next: NextFunction) => deleteUserController.handle(req, res, next)
-);;
+    auditMiddleware('DELETE_USER', (req: AuthRequest) => `Usuario con ID ${req.user?.id_usuario} eliminó usuario con ID ${req.params.id_usuario}`),
+    (req: AuthRequest, res: Response, next: NextFunction) =>
+        deleteUserController.handle(req, res, next)
+);
 
-router.get('/v1/users/:id_usuario', authMiddleware, (req: Request, res: Response, next: NextFunction) =>
-    readUserController.handle(req, res, next)
+// Ruta para leer usuario
+router.get('/v1/users/:id_usuario',
+    authMiddleware,
+    auditMiddleware('READ_USER', (req: AuthRequest) => `Usuario con ID ${req.user?.id_usuario} leyó información de usuario con ID ${req.params.id_usuario}`),
+    (req: Request, res: Response, next: NextFunction) =>
+        readUserController.handle(req, res, next)
 );
 
 router.put(

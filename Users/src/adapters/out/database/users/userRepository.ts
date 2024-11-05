@@ -2,8 +2,12 @@ import { pool } from '../../../../infrastructure/config/database';
 import { User } from '../../../../core/users/domain/userEntity';
 import { UserRepositoryPort } from '../../../../application/users/ports/userRepositoryPort';
 import { UpdateUserDTO } from '../../../in/users/dtos/updateUserDto';
+import { AuditService } from '../../../../core/users/services/auditService';
 
 export class UserRepository implements UserRepositoryPort {
+
+    constructor(private auditService: AuditService) { }
+
     async findByEmail(correo: string): Promise<User | null> {
         const [rows]: [any[], any] = await pool.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
         return rows.length > 0 ? rows[0] : null;
@@ -29,7 +33,6 @@ export class UserRepository implements UserRepositoryPort {
         return rows.length > 0 ? rows[0] : null;
     }
 
-    // Actualizar usuario por ID
     async updateUser(id: string, updateData: UpdateUserDTO): Promise<User> {
         await pool.query(
             'UPDATE usuarios SET nombre = ?, correo = ?, password = ?, telefono = ? WHERE id_usuario = ?',
@@ -41,10 +44,20 @@ export class UserRepository implements UserRepositoryPort {
                 id
             ]
         );
+
         const updatedUser = await this.findById(id);
         if (!updatedUser) {
             throw new Error('User not found after update');
         }
+
+        // Registro de auditoría para actualización
+        await this.auditService.createAuditLog({
+            id_usuario: id,
+            accion: 'ACTUALIZAR',
+            entidad_afectada: 'usuarios',
+            id_entidad: id,
+        });
+
         return updatedUser;
     }
 

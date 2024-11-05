@@ -1,5 +1,5 @@
 export interface UpdateHijoDTO {
     nombre?: string;
-    edad?: number;
+    fecha_nacimiento?: Date;
     direccion?: string;
 }
