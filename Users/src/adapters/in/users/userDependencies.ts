@@ -46,18 +46,6 @@ const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoReposito
 const updateHijoUseCase = new UpdateHijoUseCase(hijoRepository);
 const updateDocenteUseCase = new UpdateDocenteUseCase(docenteRepository);
 
-// Crear instancias de controladores
-export const registerUserController = new RegisterUserController(registerUserUseCase);
-export const deleteUserController = new DeleteUserController(deleteUserUseCase);
-export const readUserController = new ReadUserController(readUserUseCase);
-export const updateUserController = new UpdateUserController(updateUserUseCase);
-export const loginUserController = new LoginUserController(loginUserUseCase);
-
-export const registerDocenteController = new RegisterDocenteController(registerDocenteUseCase);
-export const registerNiñoController = new RegisterHijoController(registerHijoUseCase);
-export const updateNiñoController = new UpdateHijoController(updateHijoUseCase);
-export const updateDocenteController = new UpdateDocenteController(updateDocenteUseCase);
-
 // Instancia del repositorio de auditoría
 const auditRepository = new AuditRepository();
 // Crear instancia de servicio de auditoría
@@ -68,3 +56,15 @@ const userAuditUseCase = new UserAuditUseCase(userService, auditService);
 
 // Controlador de auditoría
 export const auditController = new AuditController(auditService);
+
+// Crear instancias de controladores
+export const registerUserController = new RegisterUserController(registerUserUseCase);
+export const deleteUserController = new DeleteUserController(deleteUserUseCase);
+export const readUserController = new ReadUserController(readUserUseCase);
+export const updateUserController = new UpdateUserController(updateUserUseCase);
+export const loginUserController = new LoginUserController(loginUserUseCase, userAuditUseCase);
+
+export const registerDocenteController = new RegisterDocenteController(registerDocenteUseCase, docenteRepository);
+export const registerNiñoController = new RegisterHijoController(registerHijoUseCase);
+export const updateNiñoController = new UpdateHijoController(updateHijoUseCase);
+export const updateDocenteController = new UpdateDocenteController(updateDocenteUseCase);

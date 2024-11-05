@@ -24,7 +24,7 @@ export class UserService {
             throw new Error('Email already exists');
         }
 
-        const hashedPassword = await this.hashPassword(userDTO.contraseña);
+        const hashedPassword = await this.hashPassword(userDTO.password);
         const user = new User(uuidv4(), userDTO.nombre, userDTO.correo, hashedPassword, userDTO.telefono, userDTO.tipo);
         return await this.userRepository.createUser(user);
     }
@@ -44,7 +44,7 @@ export class UserService {
         // Actualizar los campos que se pueden modificar
         user.nombre = updateUserDTO.nombre || user.nombre;
         user.correo = updateUserDTO.correo || user.correo
-        user.contraseña = updateUserDTO.contraseña ? await this.hashPassword(updateUserDTO.contraseña) : user.contraseña;
+        user.password = updateUserDTO.password ? await this.hashPassword(updateUserDTO.password) : user.password;
         user.telefono = updateUserDTO.telefono || user.telefono;
 
         return await this.userRepository.updateUser(id, user);

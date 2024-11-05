@@ -5,7 +5,7 @@ export class User {
         public id_usuario: string = uuidv4(),
         public nombre: string,
         public correo: string,
-        public contraseña: string,
+        public password: string,
         public telefono: string,
         public tipo: 'Administrador' | 'Padre' | 'Docente',
         public fecha_registro: Date = new Date()

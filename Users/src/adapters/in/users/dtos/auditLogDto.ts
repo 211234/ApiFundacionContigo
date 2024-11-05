@@ -5,5 +5,5 @@ export interface AuditLogDTO {
     entidad_afectada: 'usuarios' | 'hijos' | 'docentes' | 'medicamentos' | 'citas_medicas' | 'alimentos' | 'actividades' | 'hilos_chat' | 'mensajes_chat';
     id_entidad: string;
     descripcion: string;
-    fecha: Date;
+    fecha_accion: Date;
 }

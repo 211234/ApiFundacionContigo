@@ -12,8 +12,8 @@ export class UserRepository implements UserRepositoryPort {
     // Crear un nuevo usuario
     async createUser(user: User): Promise<User> {
         const [result]: any = await pool.query(
-            'INSERT INTO usuarios (id_usuario, nombre, correo, contraseña, telefono, tipo, fecha_registro) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [user.id_usuario, user.nombre, user.correo, user.contraseña, user.telefono, user.tipo, user.fecha_registro]
+            'INSERT INTO usuarios (id_usuario, nombre, correo, password, telefono, tipo, fecha_registro) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [user.id_usuario, user.nombre, user.correo, user.password, user.telefono, user.tipo, user.fecha_registro]
         );
         return { ...user, id_usuario: (result as any).insertId };
     }
@@ -32,11 +32,11 @@ export class UserRepository implements UserRepositoryPort {
     // Actualizar usuario por ID
     async updateUser(id: string, updateData: UpdateUserDTO): Promise<User> {
         await pool.query(
-            'UPDATE usuarios SET nombre = ?, correo = ?, contraseña = ?, telefono = ? WHERE id_usuario = ?',
+            'UPDATE usuarios SET nombre = ?, correo = ?, password = ?, telefono = ? WHERE id_usuario = ?',
             [
                 updateData.nombre,
                 updateData.correo,
-                updateData.contraseña,
+                updateData.password,
                 updateData.telefono,
                 id
             ]

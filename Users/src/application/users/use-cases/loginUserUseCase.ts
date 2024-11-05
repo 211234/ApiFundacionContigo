@@ -10,7 +10,7 @@ export class LoginUserUseCase {
 
     async execute(loginDTO: LoginUserDTO) {
         const user = await this.userRepository.findByEmail(loginDTO.correo);
-        if (!user || !(await this.userService.comparePasswords(loginDTO.contraseña, user.contraseña))) {
+        if (!user || !(await this.userService.comparePasswords(loginDTO.password, user.password))) {
             throw new Error('Invalid credentials');
         }
         return user;

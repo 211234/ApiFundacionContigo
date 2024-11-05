@@ -7,7 +7,7 @@ export class AuditRepository {
 
     async createAuditLog(auditLog: RegistroAuditoria): Promise<void> {
         const query = `
-            INSERT INTO registro_auditoria (id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, descripcion, fecha)
+            INSERT INTO registro_auditoria (id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, descripcion, fecha_accion)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
         const values = [
@@ -33,7 +33,7 @@ export class AuditRepository {
 
     async getAllAuditLogs(): Promise<RegistroAuditoria[]> {
         const query = `
-            SELECT id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, descripcion, fecha
+            SELECT id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, descripcion, fecha_accion as fecha
             FROM registro_auditoria
         `;
 
@@ -59,7 +59,7 @@ export class AuditRepository {
 
     async getAuditLogById(id_auditoria: string): Promise<RegistroAuditoria | null> {
         const query = `
-            SELECT id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, descripcion, fecha
+            SELECT id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, descripcion, fecha_accion as fecha
             FROM registro_auditoria
             WHERE id_auditoria = ?
         `;

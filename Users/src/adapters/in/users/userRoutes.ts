@@ -49,12 +49,15 @@ const loginLimiter = rateLimit({
 });
 
 // Rutas de usuarios
-router.post('/v1/register', registerUserValidator, validateResults, loginLimiter, (req: Request, res: Response, next: NextFunction) =>
+router.post('/v1/register', registerUserValidator, validateResults, (req: Request, res: Response, next: NextFunction) =>
     registerUserController.handle(req, res, next)
 );
 
-router.post('/v1/login', (req: Request, res: Response, next: NextFunction) =>
-    loginUserController.handle(req, res, next)
+router.post(
+    '/v1/login', 
+    loginLimiter, 
+    auditMiddleware('LOGIN', (req: AuthRequest) => `El usuario con correo ${req.body.correo} inicio sesión`), 
+    (req: Request, res: Response, next: NextFunction) => loginUserController.handle(req, res, next)
 );
 
 router.delete(

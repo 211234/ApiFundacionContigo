@@ -48,23 +48,32 @@ export class UserAuditUseCase {
     }
 
     async loginUser(id_usuario: string) {
+        console.log("Attempting loginUser in UserAuditUseCase for user:", id_usuario);
         const user = await this.userService.loginUser(id_usuario);
+
+        console.log("User logged in, attempting to create audit log...");
         await this.auditService.createAuditLog({
             id_usuario,
             accion: 'LOGIN',
             entidad_afectada: 'usuarios',
             id_entidad: id_usuario,
         });
+        console.log("Audit log created successfully in loginUser");
+
         return user;
     }
 
     async logoutUser(id_usuario: string) {
+        console.log("Attempting logoutUser in UserAuditUseCase for user:", id_usuario);
         await this.userService.logoutUser(id_usuario);
+
+        console.log("User logged out, attempting to create audit log...");
         await this.auditService.createAuditLog({
             id_usuario,
             accion: 'LOGOUT',
             entidad_afectada: 'usuarios',
             id_entidad: id_usuario,
         });
+        console.log("Audit log created successfully in logoutUser");
     }
 }

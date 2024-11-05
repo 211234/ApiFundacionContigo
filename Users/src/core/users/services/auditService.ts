@@ -13,9 +13,25 @@ export class AuditService {
     constructor(private auditRepository: AuditRepository) { }
 
     async createAuditLog(data: AuditData) {
-        const descripcion = this.generateDescription(data.accion, data.entidad_afectada, data.id_entidad);
-        const audit = new RegistroAuditoria(uuidv4(), data.id_usuario, data.accion, data.entidad_afectada, data.id_entidad, new Date(), descripcion);
-        await this.auditRepository.createAuditLog(audit);
+        try {
+            const descripcion = this.generateDescription(data.accion, data.entidad_afectada, data.id_entidad);
+            const audit = new RegistroAuditoria(
+                uuidv4(),
+                data.id_usuario,
+                data.accion,
+                data.entidad_afectada,
+                data.id_entidad,
+                new Date(),
+                descripcion
+            );
+
+            console.log("Attempting to create audit log with data:", audit);
+            await this.auditRepository.createAuditLog(audit);
+            console.log("Audit log successfully created in database for:", audit.id_auditoria);
+        } catch (error) {
+            console.error("Error during audit log creation in AuditService:", error);
+            throw error;
+        }
     }
 
     async getAllAuditLogs(): Promise<RegistroAuditoria[]> {

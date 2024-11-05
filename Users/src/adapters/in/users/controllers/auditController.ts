@@ -20,7 +20,7 @@ export class AuditController {
                 entidad_afectada: log.entidad_afectada,
                 id_entidad: log.id_entidad,
                 descripcion: log.descripcion,
-                fecha: log.fecha_accion,
+                fecha_accion: log.fecha_accion,
             }));
             res.json(logsDTO);
         } catch (error) {
@@ -42,7 +42,7 @@ export class AuditController {
                     entidad_afectada: log.entidad_afectada,
                     id_entidad: log.id_entidad,
                     descripcion: log.descripcion,
-                    fecha: log.fecha_accion,
+                    fecha_accion: log.fecha_accion,
                 };
                 res.json(logDTO);
             }

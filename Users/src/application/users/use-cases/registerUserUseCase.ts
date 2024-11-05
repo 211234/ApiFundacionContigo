@@ -23,7 +23,7 @@ export class RegisterUserUseCase {
         const userType = existingUsersCount === 0 ? 'Administrador' : userDTO.tipo || 'Padre';
 
         // Hashear la contraseña
-        const hashedPassword = await this.userService.hashPassword(userDTO.contraseña);
+        const hashedPassword = await this.userService.hashPassword(userDTO.password);
 
         // Crear el nuevo usuario con el tipo asignado
         const user = new User(uuidv4(), userDTO.nombre, userDTO.correo, hashedPassword, userDTO.telefono, userType);

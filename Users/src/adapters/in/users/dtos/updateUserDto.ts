@@ -1,6 +1,6 @@
 export interface UpdateUserDTO {
     nombre?: string;
     correo?: string;
-    contraseña?: string;
+    password?: string;
     telefono?: string;
 }

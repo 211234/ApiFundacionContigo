@@ -12,7 +12,7 @@ export const registerUserValidator = [
         .isEmail()
         .withMessage('Debe proporcionar un correo electrónico válido'),
 
-    body('contraseña')
+    body('password')
         .optional()
         .isLength({ min: 8 })
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)

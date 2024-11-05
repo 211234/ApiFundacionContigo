@@ -7,31 +7,49 @@ export class AuditRepository {
         (id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, fecha_accion, descripcion) 
         VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
-        await pool.query(query, [
-            audit.id_auditoria,
-            audit.id_usuario,
-            audit.accion,
-            audit.entidad_afectada,
-            audit.id_entidad,
-            audit.fecha_accion,
-            audit.descripcion
-        ]);
+        console.log("Executing query for createAuditLog with data:", audit);
+
+        const connection = await pool.getConnection();
+        try {
+            await connection.query(query, [
+                audit.id_auditoria,
+                audit.id_usuario,
+                audit.accion,
+                audit.entidad_afectada,
+                audit.id_entidad,
+                audit.fecha_accion,
+                audit.descripcion
+            ]);
+            console.log("Audit log inserted successfully with ID:", audit.id_auditoria);
+        } catch (error) {
+            console.error("Error inserting audit log into the database:", error);
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 
     public async getAllAuditLogs(): Promise<RegistroAuditoria[]> {
         const query = `SELECT id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, fecha_accion, descripcion 
                        FROM registro_auditoria`;
-
-        const [rows]: [any[], any] = await pool.query(query);
-        return rows.map((row: any) => ({
-            id_auditoria: row.id_auditoria,
-            id_usuario: row.id_usuario,
-            accion: row.accion,
-            entidad_afectada: row.entidad_afectada,
-            id_entidad: row.id_entidad,
-            fecha_accion: row.fecha_accion,
-            descripcion: row.descripcion,
-        }));
+        const connection = await pool.getConnection();
+        try {
+            const [rows] = await connection.query(query);
+            return (rows as any[]).map(row => ({
+                id_auditoria: row.id_auditoria,
+                id_usuario: row.id_usuario,
+                accion: row.accion,
+                entidad_afectada: row.entidad_afectada,
+                id_entidad: row.id_entidad,
+                fecha_accion: row.fecha_accion,
+                descripcion: row.descripcion,
+            }));
+        } catch (error) {
+            console.error("Error fetching all audit logs:", error);
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 
     public async getAuditLogById(id_auditoria: string): Promise<RegistroAuditoria | null> {
