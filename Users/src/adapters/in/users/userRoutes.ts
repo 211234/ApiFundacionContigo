@@ -21,18 +21,17 @@ import {
 import {
     authMiddleware,
     isAdmin,
-    isPadre,
-    padreOnlyMiddleware,
+    isPadreMiddleware,
     adminOnlyMiddleware,
-    auditMiddleware
+    auditUserMiddleware
 } from '../../../infrastructure/middlewares/authMiddleware';
 
 
 import { registerUserValidator } from './validators/registerUserValidator';
 import { updateUserValidator } from './validators/updateUserValidator';
-import { registerNiñoValidator } from './validators/registerHijoValidator';
+import { registerHijoValidator } from './validators/registerHijoValidator';
 import { registerDocenteValidator } from './validators/registerDocenteValidator';
-import { updateNiñoValidator } from './validators/updateHijoValidator';
+import { updateHijoValidator } from './validators/updateHijoValidator';
 import { updateDocenteValidator } from '../../../adapters/in/users/validators/updateDocenteValidator';
 
 import { validateResults } from '../../../infrastructure/middlewares/validationMiddleware';
@@ -52,7 +51,7 @@ const loginLimiter = rateLimit({
 router.post('/v1/register',
     registerUserValidator,
     validateResults,
-    auditMiddleware('REGISTER_USER', (req: AuthRequest) => `Registro de usuario con correo ${req.body.correo}`),
+    auditUserMiddleware('REGISTER_USER', (req: AuthRequest) => `Registro de usuario con correo ${req.body.correo}`),
     (req: Request, res: Response, next: NextFunction) =>
         registerUserController.handle(req, res, next)
 );
@@ -60,7 +59,7 @@ router.post('/v1/register',
 // Ruta de inicio de sesión (auditada)
 router.post('/v1/login',
     loginLimiter,
-    auditMiddleware('LOGIN', (req: AuthRequest) => `Inicio de sesión para usuario con correo ${req.body.correo}`),
+    auditUserMiddleware('LOGIN', (req: AuthRequest) => `Inicio de sesión para usuario con correo ${req.body.correo}`),
     (req: Request, res: Response, next: NextFunction) =>
         loginUserController.handle(req, res, next)
 );
@@ -69,7 +68,7 @@ router.post('/v1/login',
 router.delete('/v1/users/:id_usuario',
     authMiddleware,
     isAdmin,
-    auditMiddleware('DELETE_USER', (req: AuthRequest) => `Usuario con ID ${req.user?.id_usuario} eliminó usuario con ID ${req.params.id_usuario}`),
+    auditUserMiddleware('DELETE_USER', (req: AuthRequest) => `Usuario con ID ${req.user?.id_usuario} eliminó usuario con ID ${req.params.id_usuario}`),
     (req: AuthRequest, res: Response, next: NextFunction) =>
         deleteUserController.handle(req, res, next)
 );
@@ -77,7 +76,7 @@ router.delete('/v1/users/:id_usuario',
 // Ruta para leer usuario
 router.get('/v1/users/:id_usuario',
     authMiddleware,
-    auditMiddleware('READ_USER', (req: AuthRequest) => `Usuario con ID ${req.user?.id_usuario} leyó información de usuario con ID ${req.params.id_usuario}`),
+    auditUserMiddleware('READ_USER', (req: AuthRequest) => `Usuario con ID ${req.user?.id_usuario} leyó información de usuario con ID ${req.params.id_usuario}`),
     (req: Request, res: Response, next: NextFunction) =>
         readUserController.handle(req, res, next)
 );
@@ -87,7 +86,7 @@ router.put(
     authMiddleware,
     updateUserValidator,
     validateResults,
-    auditMiddleware('UPDATE_USER', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} actualizó el usuario con ID ${req.params.id_usuario}`),
+    auditUserMiddleware('UPDATE_USER', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} actualizó el usuario con ID ${req.params.id_usuario}`),
     (req: Request, res: Response, next: NextFunction) =>
         updateUserController.handle(req, res, next)
 );
@@ -99,29 +98,29 @@ router.post(
     isAdmin,
     registerDocenteValidator,
     validateResults,
-    auditMiddleware('REGISTER_DOCENTE', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} registró un nuevo docente`),
+    auditUserMiddleware('REGISTER_DOCENTE', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} registró un nuevo docente`),
     (req: Request, res: Response, next: NextFunction) =>
         registerDocenteController.handle(req, res, next)
 );
 
 router.post(
-    '/v1/niños/register',
+    '/v1/hijos/register',
     authMiddleware,
-    isPadre,
-    registerNiñoValidator,
+    isPadreMiddleware ,
+    registerHijoValidator,
     validateResults,
-    auditMiddleware('REGISTER_NIÑO', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} registró un nuevo niño`),
+    auditUserMiddleware('REGISTER_HIJO', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} registró un nuevo hijo`),
     (req: Request, res: Response, next: NextFunction) =>
         registerNiñoController.handle(req, res, next)
 );
 
 router.put(
-    '/v1/niños/:id_niño',
+    '/v1/hijos/:id_hijo',
     authMiddleware,
-    padreOnlyMiddleware,
-    updateNiñoValidator,
+    isPadreMiddleware,
+    updateHijoValidator,
     validateResults,
-    auditMiddleware('UPDATE_NIÑO', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} actualizó al niño con ID ${req.params.id_niño}`),
+    auditUserMiddleware('UPDATE_HIJO', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} actualizó al hijo con ID ${req.params.id_niño}`),
     (req: Request, res: Response, next: NextFunction) =>
         updateNiñoController.handle(req, res, next)
 );
@@ -132,7 +131,7 @@ router.put(
     adminOnlyMiddleware,
     updateDocenteValidator,
     validateResults,
-    auditMiddleware('UPDATE_DOCENTE', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} actualizó al docente con ID ${req.params.id_docente}`),
+    auditUserMiddleware('UPDATE_DOCENTE', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} actualizó al docente con ID ${req.params.id_docente}`),
     (req: Request, res: Response, next: NextFunction) =>
         updateDocenteController.handle(req, res, next)
 );

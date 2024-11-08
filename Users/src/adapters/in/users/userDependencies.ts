@@ -6,13 +6,10 @@ import { RegisterUserController } from './controllers/registerUserController';
 import { DeleteUserController } from './controllers/deleteUserController';
 import { ReadUserController } from './controllers/readUserController';
 import { UpdateUserController } from './controllers/updateUserController';
-import { UserRepository } from '../../out/database/users/userRepository';
-import { UserService } from '../../../core/users/services/servicesUser';
 import { LoginUserUseCase } from '../../../application/users/use-cases/loginUserUseCase';
 import { LoginUserController } from './controllers/loginUserController';
 import { RegisterDocenteUseCase } from '../../../application/users/use-cases/registerDocenteUseCase';
 import { RegisterDocenteController } from './controllers/registerDocenteController';
-import { DocenteRepository } from '../../out/database/users/docenteRepository';
 import { UpdateDocenteController } from './controllers/updateDocenteController';
 import { HijoRepository } from '../../out/database/users/hijoRepository';
 import { RegisterHijoUseCase } from '../../../application/users/use-cases/registerHijoUseCase';
@@ -24,27 +21,26 @@ import { AuditRepository } from '../../out/database/users/auditRepository';
 import { UserAuditUseCase } from '../../../application/users/use-cases/userAuditUseCase';
 import { AuditController } from './controllers/auditController';
 import { AuditService } from '../../../core/users/services/auditService';
-
+import { UserRepository } from '../../out/database/users/userRepository';
+import { DocenteRepository } from '../../out/database/users/docenteRepository';
+import { UserService } from '../../../core/users/services/servicesUser';
 
 // Crear instancias de repositorios
-const userRepository = new UserRepository();
+const auditRepository = new AuditRepository();
+const auditService = new AuditService(auditRepository);
+
+const userRepository = new UserRepository(auditService); // Aseguramos que se pase el auditService
 const docenteRepository = new DocenteRepository();
 const hijoRepository = new HijoRepository();
 
-// Instancia del repositorio de auditoría
-const auditRepository = new AuditRepository();
-
-// Crear instancia de servicio de auditoría
-const auditService = new AuditService(auditRepository);
-
 // Crear instancias de servicios
-const userService = new UserService(userRepository);
+const userService = new UserService(userRepository, auditService);
 
 // Crear instancias de casos de uso
 const registerUserUseCase = new RegisterUserUseCase(userRepository, userService);
 const deleteUserUseCase = new DeleteUserUseCase(userRepository);
 const readUserUseCase = new ReadUserUseCase(userRepository);
-const updateUserUseCase = new UpdateUserUseCase(userRepository);
+const updateUserUseCase = new UpdateUserUseCase(userRepository, auditService);
 const loginUserUseCase = new LoginUserUseCase(userRepository, userService);
 
 const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository, auditService);
@@ -52,14 +48,11 @@ const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoReposito
 const updateHijoUseCase = new UpdateHijoUseCase(hijoRepository);
 const updateDocenteUseCase = new UpdateDocenteUseCase(docenteRepository);
 
-// Caso de uso de auditoría
+// Crear instancias de casos de uso
 const userAuditUseCase = new UserAuditUseCase(userService, auditService);
 
-// Controlador de auditoría
-export const auditController = new AuditController(auditService);
-
 // Crear instancias de controladores
-export const registerUserController = new RegisterUserController(registerUserUseCase);
+export const registerUserController = new RegisterUserController(registerUserUseCase, auditService);
 export const deleteUserController = new DeleteUserController(deleteUserUseCase);
 export const readUserController = new ReadUserController(readUserUseCase);
 export const updateUserController = new UpdateUserController(updateUserUseCase);
@@ -69,3 +62,6 @@ export const registerDocenteController = new RegisterDocenteController(registerD
 export const registerNiñoController = new RegisterHijoController(registerHijoUseCase);
 export const updateNiñoController = new UpdateHijoController(updateHijoUseCase);
 export const updateDocenteController = new UpdateDocenteController(updateDocenteUseCase);
+
+// Instancia de controlador de auditoría
+export const auditController = new AuditController(auditService);

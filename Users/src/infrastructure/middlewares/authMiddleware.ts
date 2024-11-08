@@ -63,14 +63,16 @@ export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction): vo
     next();
 };
 
-// Middleware para verificar si el usuario es un Padre
-export const isPadre = (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user || req.user.tipo !== 'Padre') {
-        res.status(403).json({ message: 'Solo acceso para usuarios de tipo Padre' });
-        return;
-    }
-    next();
+export const isPadreMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
+    authMiddleware(req, res, () => {
+        if (!req.user || req.user.tipo !== 'Padre') {
+            res.status(403).json({ message: 'Solo acceso para usuarios de tipo Padre' });
+            return;
+        }
+        next();
+    });
 };
+
 
 // Middleware combinado para autenticación y verificación de administrador
 export const adminOnlyMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
@@ -79,21 +81,21 @@ export const adminOnlyMiddleware = (req: AuthRequest, res: Response, next: NextF
     });
 };
 
-// Middleware combinado para autenticación y verificación de Padre
-export const padreOnlyMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
-    authMiddleware(req, res, () => {
-        isPadre(req, res, next);
-    });
-};
+// Instancia de `AuditRepository` y `AuditService` para reutilización
+const auditRepository = new AuditRepository();
+const auditService = new AuditService(auditRepository);
 
-// Instancia de `UserAuditUseCase` para evitar recrearla en cada solicitud
-const userAuditUseCase = new UserAuditUseCase(
-    new UserService(new UserRepository()),
-    new AuditService(new AuditRepository())
-);
+// Instancia de `UserRepository` con el `AuditService` inyectado
+const userRepository = new UserRepository(auditService);
 
-// Middleware de auditoría
-export const auditMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
+// Instancia de `UserService` con las dependencias necesarias
+const userService = new UserService(userRepository, auditService);
+
+// Instancia de `UserAuditUseCase` reutilizando servicios ya creados
+const userAuditUseCase = new UserAuditUseCase(userService, auditService);
+
+// Middleware de auditoría corregido
+export const auditUserMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
     return async (req: AuthRequest, res: Response, next: NextFunction) => {
         const id_usuario = req.user?.id_usuario;
 
@@ -104,7 +106,29 @@ export const auditMiddleware = (accion: string, descripcionCallback: (req: Reque
                     accion,
                     entidad_afectada: 'usuarios',
                     id_entidad: id_usuario,
-                    descripcion: descripcionCallback(req),  // Descripción dinámica
+                    descripcion: descripcionCallback(req), // Descripción dinámica
+                });
+            } catch (error) {
+                console.error("Error registrando acción de auditoría:", error);
+            }
+        }
+
+        next();
+    };
+};
+
+export const auditMedicamentoMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
+    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const id_usuario = req.user?.id_usuario;
+
+        if (id_usuario) {
+            try {
+                await userAuditUseCase.auditUserAction({
+                    id_usuario,
+                    accion,
+                    entidad_afectada: 'medicamentos', // Asegura que la entidad sea medicamentos
+                    id_entidad: req.params.id || req.body.id_medicamento,
+                    descripcion: descripcionCallback(req), // Descripción dinámica
                 });
             } catch (error) {
                 console.error("Error registrando acción de auditoría:", error);

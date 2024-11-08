@@ -1,6 +1,6 @@
 import { body } from 'express-validator';
 
-export const updateNiñoValidator = [
+export const updateHijoValidator = [
     body('nombre')
         .optional()
         .isString()

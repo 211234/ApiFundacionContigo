@@ -1,6 +1,6 @@
 import { body } from 'express-validator';
 
-export const registerNiñoValidator = [
+export const registerHijoValidator = [
     body('nombre')
     .notEmpty()
     .withMessage('El nombre del niño es obligatorio'),
