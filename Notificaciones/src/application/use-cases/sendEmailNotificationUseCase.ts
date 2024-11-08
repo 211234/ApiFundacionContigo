@@ -1,7 +1,7 @@
 // src/application/use-cases/sendEmailNotificationUseCase.ts
 import { RabbitMQPublisher } from '../../adapaters/out/queue/rabbitMQPublisher';
 import { Notification } from '../../core/domain/entities/notification';
-import { SendEmailNotificationDTO } from '../../adapters/in/dtos/sendEmailNotificationDTO';
+import { SendEmailNotificationDTO } from '../../adapaters/in/dtos/notificationDTO';
 
 export class SendEmailNotificationUseCase {
     private readonly queueName = 'email_notifications';

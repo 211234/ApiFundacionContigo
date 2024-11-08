@@ -17,17 +17,12 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas de notificaciones
-app.use('/api/notifications', notificationRoutes);
+app.use('/api', notificationRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hello, Welcome to My API Fundación Cuenta Conmigo Notification!');
 });
 
-// Middleware para manejo de errores
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
 
 async function start() {
     try {
