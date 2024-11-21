@@ -34,14 +34,13 @@ export class RabbitMQConnection {
                 console.log(`Cola '${rabbitMQConfig.notificationQueue}' vinculada al exchange principal ✅`);
             }
 
-            return this.channel; // Devolver el canal correctamente
+            return this.channel;
         } catch (error) {
             console.error('Error al inicializar RabbitMQ:', error);
             process.exit(1);
         }
     }
 
-    // Método para obtener el canal ya inicializado
     public static getChannel(): amqp.Channel {
         if (!this.channel) {
             throw new Error('RabbitMQ channel no está inicializado');

@@ -3,4 +3,5 @@ export interface UpdateUserDTO {
     correo?: string;
     password?: string;
     telefono?: string;
+    estado_verificacion?: 'pendiente' | 'confirmado';
 }

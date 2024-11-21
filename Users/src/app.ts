@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRoutes from './adapters/in/users/userRoutes';
+import { RabbitMQConnection } from '../src/infrastructure/config/rabbitMQ';
 import { connect } from './infrastructure/config/database';
 import { env } from './infrastructure/config/env';
 
@@ -13,14 +14,14 @@ const port = env.port;
 app.use(cors());
 app.use(express.json());
 
-
 app.use('/api', userRoutes);
+
+RabbitMQConnection.init();
 
 app.get('/', (req, res) => {
     res.send('Hello, Welcome to My API Fundación Cuenta Conmigo!');
 });
 
-// Middleware para manejo de errores
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');

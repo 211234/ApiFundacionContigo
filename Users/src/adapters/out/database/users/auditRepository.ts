@@ -1,11 +1,21 @@
 import { pool } from '../../../../infrastructure/config/database';
 import { RegistroAuditoria } from '../../../../core/users/domain/auditEntity';
 import { AuditRepositoryPort } from '../../../../application/users/ports/auditRepositoryPorts';
+import { UserRepositoryPort } from '../../../../application/users/ports/userRepositoryPort';
 
 export class AuditRepository {
-    constructor(private db = pool) {}
+    constructor(
+        private db = pool,
+        private userRepository: UserRepositoryPort // Dependencia para verificar usuarios
+    ) {}
 
     async createAuditLog(auditLog: RegistroAuditoria): Promise<void> {
+        const user = await this.userRepository.findById(auditLog.id_usuario);
+        if (!user) {
+            console.warn(`Usuario con ID ${auditLog.id_usuario} no existe. No se puede registrar la auditoría.`);
+            return;
+        }
+
         const query = `
             INSERT INTO registro_auditoria (id_auditoria, id_usuario, accion, entidad_afectada, id_entidad, descripcion, fecha_accion)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -24,7 +34,7 @@ export class AuditRepository {
         try {
             await connection.query(query, values);
         } catch (error) {
-            console.error("Error creating audit log:", error);
+            console.error('Error creating audit log:', error);
             throw error;
         } finally {
             connection.release();
@@ -50,7 +60,7 @@ export class AuditRepository {
                 fecha_accion: row.fecha,
             }));
         } catch (error) {
-            console.error("Error fetching all audit logs:", error);
+            console.error('Error fetching all audit logs:', error);
             throw error;
         } finally {
             connection.release();

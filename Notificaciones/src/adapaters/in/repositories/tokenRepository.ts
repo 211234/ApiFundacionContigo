@@ -2,11 +2,11 @@ import { IToken, TokenModel } from '../../../core/domain/entities/token';
 
 export class TokenRepository {
     async createToken(tokenData: IToken): Promise<IToken> {
-        return await tokenData.save(); // Utiliza el método `save` de Mongoose
+        return await tokenData.save();
     }
 
-    async findTokenById(tokenId: string): Promise<IToken | null> {
-        return await TokenModel.findById(tokenId);
+    async findTokenByCorreoAndCodigo(correo: string, codigo: string): Promise<IToken | null> {
+        return await TokenModel.findOne({ correo, codigo });
     }
 
     async markTokenAsUsed(tokenId: string): Promise<void> {

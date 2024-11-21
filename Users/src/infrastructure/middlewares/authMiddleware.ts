@@ -7,6 +7,7 @@ import { UserService } from '../../core/users/services/servicesUser';
 import { AuditService } from '../../core/users/services/auditService';
 import { UserRepository } from '../../adapters/out/database/users/userRepository';
 import { AuditRepository } from '../../adapters/out/database/users/auditRepository';
+import { pool } from '../config/database';
 
 // Configuración de secreto JWT
 const secret = env.jwt.secret;
@@ -81,14 +82,11 @@ export const adminOnlyMiddleware = (req: AuthRequest, res: Response, next: NextF
     });
 };
 
-// Instancia de `AuditRepository` y `AuditService` para reutilización
-const auditRepository = new AuditRepository();
+const userRepository = new UserRepository();
+
+const auditRepository = new AuditRepository(pool, userRepository);
 const auditService = new AuditService(auditRepository);
 
-// Instancia de `UserRepository` con el `AuditService` inyectado
-const userRepository = new UserRepository(auditService);
-
-// Instancia de `UserService` con las dependencias necesarias
 const userService = new UserService(userRepository, auditService);
 
 // Instancia de `UserAuditUseCase` reutilizando servicios ya creados
@@ -126,7 +124,7 @@ export const auditMedicamentoMiddleware = (accion: string, descripcionCallback: 
                 await userAuditUseCase.auditUserAction({
                     id_usuario,
                     accion,
-                    entidad_afectada: 'medicamentos', // Asegura que la entidad sea medicamentos
+                    entidad_afectada: 'medicamentos',
                     id_entidad: req.params.id || req.body.id_medicamento,
                     descripcion: descripcionCallback(req), // Descripción dinámica
                 });

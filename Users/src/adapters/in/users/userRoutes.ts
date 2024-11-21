@@ -15,7 +15,8 @@ import {
     registerNiñoController,
     updateNiñoController,
     updateDocenteController,
-    auditController
+    auditController,
+    confirmAccountController
 } from './userDependencies';
 
 import {
@@ -54,6 +55,12 @@ router.post('/v1/register',
     auditUserMiddleware('REGISTER_USER', (req: AuthRequest) => `Registro de usuario con correo ${req.body.correo}`),
     (req: Request, res: Response, next: NextFunction) =>
         registerUserController.handle(req, res, next)
+);
+
+router.post(
+    '/v1/confirm-account',
+    auditUserMiddleware('ACTUALIZAR_ESTADO_VERIFICACION', (req) => `Confirmación de cuenta para correo: ${req.body.correo}`),
+    async (req, res, next) => confirmAccountController.handle(req, res, next)
 );
 
 // Ruta de inicio de sesión (auditada)
@@ -106,7 +113,7 @@ router.post(
 router.post(
     '/v1/hijos/register',
     authMiddleware,
-    isPadreMiddleware ,
+    isPadreMiddleware,
     registerHijoValidator,
     validateResults,
     auditUserMiddleware('REGISTER_HIJO', (req: AuthRequest) => `El usuario con ID ${req.user?.id_usuario} registró un nuevo hijo`),

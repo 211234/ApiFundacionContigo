@@ -24,32 +24,38 @@ import { AuditService } from '../../../core/users/services/auditService';
 import { UserRepository } from '../../out/database/users/userRepository';
 import { DocenteRepository } from '../../out/database/users/docenteRepository';
 import { UserService } from '../../../core/users/services/servicesUser';
+import { RabbitMQPublisher } from '../../out/queue/rabbitMQPublisher';
+import { TokenService } from '../../../core/users/services/tokenService';
+import { ConfirmAccountController } from './controllers/confirmAccountController';
+import { pool } from '../../../infrastructure/config/database';
 
 // Crear instancias de repositorios
-const auditRepository = new AuditRepository();
+const userRepository = new UserRepository();
+const auditRepository = new AuditRepository(pool, userRepository);
 const auditService = new AuditService(auditRepository);
 
-const userRepository = new UserRepository(auditService); // Aseguramos que se pase el auditService
+// Asignar auditService al userRepository después de su creación
+userRepository.setAuditService(auditService);
+
 const docenteRepository = new DocenteRepository();
 const hijoRepository = new HijoRepository();
 
 // Crear instancias de servicios
 const userService = new UserService(userRepository, auditService);
+const rabbitMQPublisher = new RabbitMQPublisher();
+const tokenService = new TokenService();
 
-// Crear instancias de casos de uso
-const registerUserUseCase = new RegisterUserUseCase(userRepository, userService);
+const registerUserUseCase = new RegisterUserUseCase(userRepository, userService, rabbitMQPublisher, tokenService);
 const deleteUserUseCase = new DeleteUserUseCase(userRepository);
 const readUserUseCase = new ReadUserUseCase(userRepository);
 const updateUserUseCase = new UpdateUserUseCase(userRepository, auditService);
 const loginUserUseCase = new LoginUserUseCase(userRepository, userService);
+const userAuditUseCase = new UserAuditUseCase(userService, auditService);
 
 const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository, auditService);
 const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoRepository, auditService);
 const updateHijoUseCase = new UpdateHijoUseCase(hijoRepository);
 const updateDocenteUseCase = new UpdateDocenteUseCase(docenteRepository);
-
-// Crear instancias de casos de uso
-const userAuditUseCase = new UserAuditUseCase(userService, auditService);
 
 // Crear instancias de controladores
 export const registerUserController = new RegisterUserController(registerUserUseCase, auditService);
@@ -65,3 +71,5 @@ export const updateDocenteController = new UpdateDocenteController(updateDocente
 
 // Instancia de controlador de auditoría
 export const auditController = new AuditController(auditService);
+
+export const confirmAccountController = new ConfirmAccountController(tokenService, userService);

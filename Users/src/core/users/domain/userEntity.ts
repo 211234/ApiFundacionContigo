@@ -8,6 +8,7 @@ export class User {
         public password: string,
         public telefono: string,
         public tipo: 'Administrador' | 'Padre' | 'Docente',
+        public estado_verificacion: 'pendiente' | 'confirmado' = 'pendiente',
         public fecha_registro: Date = new Date()
     ) {}
 }

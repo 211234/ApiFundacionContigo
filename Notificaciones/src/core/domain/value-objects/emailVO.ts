@@ -1,18 +1,16 @@
-// emailVO.ts
 export class EmailVO {
-    private email: string;
-
-    constructor(email: string) {
-        if (!this.isValidEmail(email)) throw new Error('Invalid email format');
-        this.email = email;
+    constructor(private readonly email: string) {
+        if (!this.validate(email)) {
+            throw new Error('Invalid email format');
+        }
     }
 
-    private isValidEmail(email: string): boolean {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+    private validate(email: string): boolean {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
     }
 
-    get value() {
+    get value(): string {
         return this.email;
     }
 }

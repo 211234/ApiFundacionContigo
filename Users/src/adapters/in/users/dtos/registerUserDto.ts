@@ -4,4 +4,5 @@ export interface RegisterUserDTO {
     password: string;
     telefono: string;
     tipo: 'Administrador' | 'Padre' | 'Docente';
+    estado_verificacion?: 'pendiente' | 'confirmado';
 }

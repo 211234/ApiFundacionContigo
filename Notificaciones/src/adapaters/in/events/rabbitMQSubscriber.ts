@@ -1,30 +1,58 @@
-// src/adapters/in/events/rabbitMQSubscriber.ts
-import { channel } from '../../../infrastructure/config/rabbitMQ';
-import * as amqplib from 'amqplib';
-import { SendEmailNotificationUseCase } from '../../../application/use-cases/sendEmailNotificationUseCase';
+import amqp from 'amqplib';
+import { ProcessUserCreatedEventUseCase } from '../../../application/use-cases/processUserCreatedEventUseCase';
+import { RabbitMQConnection, rabbitMQConfig } from '../../../infrastructure/config/rabbitMQ';
 
-export const subscribeToUserRegisteredEvent = async () => {
-    try {
-        if (!channel) {
-            console.error('RabbitMQ channel is not initialized.');
-            return;
-        }
+export class RabbitMQSubscriber {
+    private processUserCreatedEventUseCase: ProcessUserCreatedEventUseCase;
 
-        // Asegurarnos de que la cola exista antes de consumir
-        await channel.assertQueue('user_registered', { durable: true });
+    constructor() {
+        this.processUserCreatedEventUseCase = new ProcessUserCreatedEventUseCase();
+    }
 
-        channel.consume('user_registered', async (msg: amqplib.Message | null) => {
+    public async subscribe() {
+        await RabbitMQConnection.init(); // Inicializar conexión
+        const channel = RabbitMQConnection.getChannel(); // Obtener canal
+
+        channel.consume(rabbitMQConfig.notificationQueue, async (msg: amqp.ConsumeMessage | null) => {
             if (msg) {
-                const userInfo = JSON.parse(msg.content.toString());
-                const useCase = new SendEmailNotificationUseCase();
-                await useCase.execute(userInfo);
-                channel.ack(msg);
-                console.log(`Processed message from user_registered queue: ${userInfo.email}`);
+                try {
+                    const event = JSON.parse(msg.content.toString());
+                    console.log(`Received event: ${event.type}`);
+
+                    switch (event.type) {
+                        case 'USER_CREATED':
+                            await this.processUserCreatedEventUseCase.execute(event.payload);
+                            break;
+                        case 'USER_CONFIRMED':
+                            await this.processUserConfirmedEvent(event.payload);
+                            break;
+                        default:
+                            console.warn(`Unhandled event type: ${event.type}`);
+                    }
+
+                    // Confirmar que el mensaje se procesó correctamente
+                    channel.ack(msg);
+                } catch (error) {
+                    console.error('Error processing message:', error);
+
+                    if (msg.fields.redelivered) {
+                        console.log('Mensaje redelivered. Enviando a DLQ...');
+                        channel.reject(msg, false); // Mueve el mensaje a la DLQ
+                    } else {
+                        console.log('Reintentando mensaje...');
+                        channel.nack(msg, false, true); // Reintenta el procesamiento
+                    }
+                }
             }
         });
-
-        console.log('Subscribed to user_registered queue ✅');
-    } catch (error) {
-        console.error('Error subscribing to RabbitMQ queue:', error);
     }
-};
+
+    private async processUserConfirmedEvent(payload: any) {
+        try {
+            console.log(`Processing USER_CONFIRMED event for user: ${payload.id_usuario}`);
+            // Aquí podrías enviar una notificación o actualizar algún estado
+        } catch (error) {
+            console.error('Error processing USER_CONFIRMED event:', error);
+        }
+    }
+}

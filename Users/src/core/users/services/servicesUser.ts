@@ -10,7 +10,7 @@ export class UserService {
     constructor(
         private readonly userRepository: UserRepositoryPort,
         private readonly auditService: AuditService
-    ) {}
+    ) { }
 
     async hashPassword(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
@@ -21,7 +21,12 @@ export class UserService {
         return await bcrypt.compare(password, hashedPassword);
     }
 
-    // Create (register user)
+    // Buscar un usuario por correo
+    async findByEmail(correo: string): Promise<User | null> {
+        return await this.userRepository.findByEmail(correo);
+    }
+
+    // Método para registrar un usuario
     async registerUser(userDTO: RegisterUserDTO): Promise<User> {
         const existingUser = await this.userRepository.findByEmail(userDTO.correo);
         if (existingUser) {
@@ -29,29 +34,72 @@ export class UserService {
         }
 
         const hashedPassword = await this.hashPassword(userDTO.password);
-        const user = new User(uuidv4(), userDTO.nombre, userDTO.correo, hashedPassword, userDTO.telefono, userDTO.tipo);
+        const user = new User(
+            uuidv4(),
+            userDTO.nombre,
+            userDTO.correo,
+            hashedPassword,
+            userDTO.telefono,
+            userDTO.tipo
+        );
         return await this.userRepository.createUser(user);
     }
 
-    // Read (find user by ID)
+    // Buscar un usuario por ID
     async findUserById(id: string): Promise<User | null> {
         return await this.userRepository.findById(id);
     }
 
+    async verifyUser(id: string): Promise<void> {
+        const user = await this.userRepository.findById(id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if (user.estado_verificacion === 'confirmado') {
+            throw new Error('User already verified');
+        }
+
+        await this.userRepository.updateVerificationStatus(id, 'confirmado');
+    }
+
+
+    // Actualizar estado de verificación del usuario
+    async updateVerificationStatus(idOrEmail: string, status: 'pendiente' | 'confirmado', searchByEmail = false): Promise<void> {
+        console.log('Buscando usuario con', searchByEmail ? `correo: ${idOrEmail}` : `id: ${idOrEmail}`);
+        const user = searchByEmail
+            ? await this.userRepository.findByEmail(idOrEmail)
+            : await this.userRepository.findById(idOrEmail);
+
+        if (!user) {
+            console.error('Usuario no encontrado');
+            throw new Error('Usuario no encontrado');
+        }
+
+        console.log('Actualizando estado a:', status);
+        await this.userRepository.updateVerificationStatus(user.id_usuario, status);
+        console.log('Estado actualizado exitosamente');
+
+        await this.auditService.createAuditLog({
+            id_usuario: user.id_usuario,
+            accion: 'ACTUALIZAR_ESTADO_VERIFICACION',
+            entidad_afectada: 'usuarios',
+            id_entidad: user.id_usuario,
+        });
+    }
+
+
+    // Actualizar un usuario
     async updateUser(id: string, updateUserDTO: UpdateUserDTO): Promise<User | null> {
+        // Buscar al usuario
         const user = await this.userRepository.findById(id);
         if (!user) {
             throw new Error('User not found');
         }
 
-        user.nombre = updateUserDTO.nombre || user.nombre;
-        user.correo = updateUserDTO.correo || user.correo;
-        user.password = updateUserDTO.password ? await this.hashPassword(updateUserDTO.password) : user.password;
-        user.telefono = updateUserDTO.telefono || user.telefono;
+        // Actualizar el usuario
+        const updatedUser = await this.userRepository.updateUser(id, updateUserDTO);
 
-        const updatedUser = await this.userRepository.updateUser(id, user);
-
-        // Registrar auditoría para actualización
+        // Registrar auditoría para la actualización del usuario
         await this.auditService.createAuditLog({
             id_usuario: id,
             accion: 'ACTUALIZAR',
@@ -62,6 +110,7 @@ export class UserService {
         return updatedUser;
     }
 
+    // Eliminar un usuario
     async deleteUser(id: string): Promise<void> {
         const user = await this.userRepository.findById(id);
         if (!user) {
@@ -70,7 +119,7 @@ export class UserService {
 
         await this.userRepository.deleteUser(id);
 
-        // Registrar auditoría para borrado
+        // Registrar auditoría para el borrado del usuario
         await this.auditService.createAuditLog({
             id_usuario: id,
             accion: 'BORRAR',
@@ -79,11 +128,19 @@ export class UserService {
         });
     }
 
+    // Iniciar sesión del usuario (esto puede necesitar mejoras)
     async loginUser(id: string): Promise<User | null> {
-        return await this.userRepository.findById(id); 
+        return await this.userRepository.findById(id);
     }
-    
+
+    // Cerrar sesión del usuario (si es necesario implementar lógica adicional)
     async logoutUser(id: string): Promise<void> {
-        // Implementa la lógica para el logout si es necesario
+        // Registrar auditoría para el logout si decides implementarlo
+        await this.auditService.createAuditLog({
+            id_usuario: id,
+            accion: 'LOGOUT',
+            entidad_afectada: 'usuarios',
+            id_entidad: id,
+        });
     }
 }

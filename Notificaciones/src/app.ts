@@ -1,45 +1,47 @@
-// app.ts
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors';
-import { env } from './infrastructure/config/env';
-import { database } from './infrastructure/config/database';
-import { initializeRabbitMQ } from './infrastructure/config/rabbitMQ';
-import { subscribeToUserRegisteredEvent } from '../../Notificaciones/src/adapaters/in/events/rabbitMQSubscriber';
-import notificationRoutes from '../src/adapaters/in/notificationRoutes';
+import { NotificationController } from '../src/adapaters/in/controllers/notificationController';
+import { RabbitMQSubscriber } from '../src/adapaters/in/events/rabbitMQSubscriber';
+import { connectMongoDB } from './infrastructure/config/database';
+import { RabbitMQConnection } from './infrastructure/config/rabbitMQ';
+import router from '../src/adapaters/in/notificationRoutes';
 
 dotenv.config();
 
 const app = express();
-const port = env.port;
+const port = process.env.PORT;
 
-app.use(cors());
 app.use(express.json());
 
-// Rutas de notificaciones
-app.use('/api', notificationRoutes);
+const notificationController = new NotificationController();
+const rabbitMQSubscriber = new RabbitMQSubscriber();
 
-app.get('/', (req, res) => {
-    res.send('Hello, Welcome to My API Fundación Cuenta Conmigo Notification!');
-});
+// Rutas
+app.use('/api/notifications', router);
 
-
-async function start() {
+const initServices = async () => {
     try {
-        // Conectar a MongoDB
-        await database.connect();
+        await connectMongoDB();
+        console.log('MongoDB connected successfully ✅');
 
-        // Conectar a RabbitMQ
-        await initializeRabbitMQ();
-        subscribeToUserRegisteredEvent();
+        await rabbitMQSubscriber.subscribe();
+        console.log('RabbitMQ subscriber initialized ✅');
 
         app.listen(port, () => {
-            console.log(`Server running on port http://localhost:${port} 🚀`);
+            console.log(`Server running on port ${port}`);
         });
     } catch (error) {
-        console.error("Failed to start server due to connection error:", error);
+        console.error('Error during initialization:', error);
         process.exit(1);
     }
-}
+};
 
-start();
+// Iniciar servicios
+initServices();
+
+// Manejo de cierre limpio
+process.on('SIGINT', async () => {
+    console.log('Gracefully shutting down...');
+    await RabbitMQConnection.close();
+    process.exit(0);
+});

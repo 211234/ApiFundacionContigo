@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { AuditService } from '../../../../core/users/services/auditService';
 import { AuditLogDTO } from '../../../../adapters/in/users/dtos/auditLogDto';
 
-// Define `AuthRequest` solo en este archivo
 interface AuthRequest extends Request {
     user?: { id_usuario: string; tipo: string };
 }

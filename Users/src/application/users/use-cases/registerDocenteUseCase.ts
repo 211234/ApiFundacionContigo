@@ -33,7 +33,8 @@ export class RegisterDocenteUseCase {
             password: hashedPassword,
             telefono: docenteDTO.telefono,
             tipo: 'Docente',
-            fecha_registro: new Date()
+            fecha_registro: new Date(),
+            estado_verificacion: 'pendiente'
         };
 
         await this.userRepository.createUser(nuevoUsuario);

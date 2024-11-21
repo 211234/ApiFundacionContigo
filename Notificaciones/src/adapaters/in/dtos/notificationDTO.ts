@@ -1,5 +1,5 @@
-// notificationDTO.ts
-export interface SendEmailNotificationDTO {
-    email: string;
-    confirmationToken: string;
+export interface NotificationDTO {
+    to: string;
+    subject: string;
+    message: string;
 }

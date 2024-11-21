@@ -9,6 +9,19 @@ export class UserRepositoryImpl implements UserRepository {
         return await this.userRepo.findOne({ where: { id_usuario } });
     }
 
+    async findByEmail(correo: string): Promise<User | null> {
+        return await this.userRepo.findByEmail(correo);
+    }
+
+    async isEmpty(): Promise<boolean> {
+        const users = await this.userRepo.find();
+        return users.length === 0;
+    }
+
+    async updateVerificationStatus(correo: string, status: 'pendiente' | 'confirmado'): Promise<void> {
+        await this.userRepo.update(correo, { estado_verificacion: status });
+    }
+
     async createUser(user: User): Promise<User> {
         return await this.userRepo.save(user);
     }

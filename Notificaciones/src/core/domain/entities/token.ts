@@ -8,6 +8,8 @@ export interface IToken extends Document {
     fecha_creacion: Date;
     usado: boolean;
     expirado: boolean;
+    codigo: string; // Nuevo campo para el código de 4 dígitos
+    expiresAt: Date;
 }
 
 const tokenSchema = new Schema<IToken>({
@@ -17,7 +19,12 @@ const tokenSchema = new Schema<IToken>({
     creadoPara: { type: String, enum: ['confirmacion', 'recuperacion'], required: true },
     fecha_creacion: { type: Date, default: Date.now },
     usado: { type: Boolean, default: false },
-    expirado: { type: Boolean, default: false }
+    expirado: { type: Boolean, default: false },
+    codigo: { type: String, required: true, unique: true  }, // Nuevo campo
+    expiresAt: { type: Date, required: true },
 });
+
+// Índice TTL para expiración automática
+tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export const TokenModel = model<IToken>('Token', tokenSchema);
