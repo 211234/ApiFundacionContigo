@@ -1,4 +1,5 @@
 import { UserRepositoryPort } from '../../../application/users/ports/userRepositoryPort';
+import { LeadRepositoryPort } from '../../../application/lead/ports/leadRepositoryPort';
 import { RegisterUserDTO } from '../../../adapters/in/users/dtos/registerUserDto';
 import { UpdateUserDTO } from '../../../adapters/in/users/dtos/updateUserDto';
 import { User } from '../domain/userEntity';
@@ -9,7 +10,8 @@ import { AuditService } from './auditService';
 export class UserService {
     constructor(
         private readonly userRepository: UserRepositoryPort,
-        private readonly auditService: AuditService
+        private readonly auditService: AuditService,
+        private readonly leadRepository: LeadRepositoryPort
     ) { }
 
     async hashPassword(password: string): Promise<string> {
@@ -50,40 +52,58 @@ export class UserService {
         return await this.userRepository.findById(id);
     }
 
-    async verifyUser(id: string): Promise<void> {
-        const user = await this.userRepository.findById(id);
-        if (!user) {
-            throw new Error('User not found');
+    async deleteLeadByEmail(correo: string): Promise<void> {
+        try {
+            await this.leadRepository.deleteByEmail(correo);
+            console.log(`Lead con correo ${correo} eliminado correctamente.`);
+        } catch (error) {
+            console.error(`Error al eliminar lead con correo ${correo}:`, error);
+            throw new Error('No se pudo eliminar el lead asociado.');
         }
-        if (user.estado_verificacion === 'confirmado') {
-            throw new Error('User already verified');
-        }
-
-        await this.userRepository.updateVerificationStatus(id, 'confirmado');
     }
 
-
-    // Actualizar estado de verificación del usuario
-    async updateVerificationStatus(idOrEmail: string, status: 'pendiente' | 'confirmado', searchByEmail = false): Promise<void> {
-        console.log('Buscando usuario con', searchByEmail ? `correo: ${idOrEmail}` : `id: ${idOrEmail}`);
+    async verifyUser(idOrEmail: string, searchByEmail = false): Promise<void> {
         const user = searchByEmail
             ? await this.userRepository.findByEmail(idOrEmail)
             : await this.userRepository.findById(idOrEmail);
 
         if (!user) {
-            console.error('Usuario no encontrado');
             throw new Error('Usuario no encontrado');
         }
 
-        console.log('Actualizando estado a:', status);
-        await this.userRepository.updateVerificationStatus(user.id_usuario, status);
-        console.log('Estado actualizado exitosamente');
+        if (user.estado_verificacion === 'confirmado') {
+            throw new Error('El usuario ya está confirmado');
+        }
 
+        await this.updateVerificationStatus(idOrEmail, 'confirmado', searchByEmail);
+        console.log(`Usuario ${idOrEmail} confirmado exitosamente.`);
+    }
+
+    // Actualizar estado de verificación del usuario
+    async updateVerificationStatus(
+        idOrEmail: string,
+        status: 'pendiente' | 'confirmado',
+        searchByEmail = false
+    ): Promise<void> {
+        console.log('Buscando usuario con', searchByEmail ? `correo: ${idOrEmail}` : `id: ${idOrEmail}`);
+
+        if (searchByEmail) {
+            const user = await this.userRepository.findByEmail(idOrEmail);
+            if (!user) throw new Error('Usuario no encontrado');
+            idOrEmail = user.id_usuario;
+        }
+
+        // Llama al repositorio para actualizar el estado
+        await this.userRepository.updateVerificationStatus(idOrEmail, status, searchByEmail);
+
+        console.log(`Estado de verificación actualizado a ${status} para ${idOrEmail}`);
+
+        // Registrar en auditoría
         await this.auditService.createAuditLog({
-            id_usuario: user.id_usuario,
+            id_usuario: idOrEmail, // Si usas correo, ajusta para buscar ID
             accion: 'ACTUALIZAR_ESTADO_VERIFICACION',
             entidad_afectada: 'usuarios',
-            id_entidad: user.id_usuario,
+            id_entidad: idOrEmail,
         });
     }
 

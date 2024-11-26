@@ -28,6 +28,7 @@ import { RabbitMQPublisher } from '../../out/queue/rabbitMQPublisher';
 import { TokenService } from '../../../core/users/services/tokenService';
 import { ConfirmAccountController } from './controllers/confirmAccountController';
 import { pool } from '../../../infrastructure/config/database';
+import { LeadRepository } from '../../out/database/lead/leadRepository';
 
 // Crear instancias de repositorios
 const userRepository = new UserRepository();
@@ -41,7 +42,8 @@ const docenteRepository = new DocenteRepository();
 const hijoRepository = new HijoRepository();
 
 // Crear instancias de servicios
-const userService = new UserService(userRepository, auditService);
+const leadRepository = new LeadRepository(); // Add this line to create an instance of LeadRepository
+const userService = new UserService(userRepository, auditService, leadRepository);
 const rabbitMQPublisher = new RabbitMQPublisher();
 const tokenService = new TokenService();
 

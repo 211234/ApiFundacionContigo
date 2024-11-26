@@ -8,6 +8,7 @@ import { AuditService } from '../../core/users/services/auditService';
 import { UserRepository } from '../../adapters/out/database/users/userRepository';
 import { AuditRepository } from '../../adapters/out/database/users/auditRepository';
 import { pool } from '../config/database';
+import { LeadRepository } from '../../adapters/out/database/lead/leadRepository';
 
 // Configuración de secreto JWT
 const secret = env.jwt.secret;
@@ -87,7 +88,8 @@ const userRepository = new UserRepository();
 const auditRepository = new AuditRepository(pool, userRepository);
 const auditService = new AuditService(auditRepository);
 
-const userService = new UserService(userRepository, auditService);
+const leadRepository = new LeadRepository(); // Assuming LeadRepository is defined somewhere
+const userService = new UserService(userRepository, auditService, leadRepository);
 
 // Instancia de `UserAuditUseCase` reutilizando servicios ya creados
 const userAuditUseCase = new UserAuditUseCase(userService, auditService);

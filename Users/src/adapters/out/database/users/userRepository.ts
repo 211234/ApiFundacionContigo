@@ -80,18 +80,42 @@ export class UserRepository implements UserRepositoryPort {
         return updatedUser;
     }
 
-    async updateVerificationStatus(correo: string, status: 'pendiente' | 'confirmado'): Promise<void> {
-        const query = `UPDATE usuarios SET estado_verificacion = ? WHERE id_usuario = ?`;
-        const [result]: any = await pool.query(query, [status, correo]);
+    async confirmUser(userId: string): Promise<{ id_usuario: string; nombre: string; correo: string } | null> {
+        const [rows]: [any[], any] = await pool.query(
+            'SELECT id_usuario, nombre, correo FROM usuarios WHERE id_usuario = ?',
+            [userId]
+        );
 
-        console.log(`Intentando actualizar estado de verificación para el usuario ${correo} a ${status}`);
-        console.log('Resultado de la consulta:', result);
+        if (rows.length === 0) {
+            return null;
+        }
+
+        const user = rows[0];
+
+        await this.updateVerificationStatus(userId, 'confirmado', false);
+
+        return user;
+    }
+
+    async updateVerificationStatus(
+        correoOrId: string,
+        status: 'pendiente' | 'confirmado',
+        searchByEmail: boolean
+    ): Promise<void> {
+        const query = searchByEmail
+            ? `UPDATE usuarios SET estado_verificacion = ? WHERE correo = ?`
+            : `UPDATE usuarios SET estado_verificacion = ? WHERE id_usuario = ?`;
+
+        const [result]: [any, any] = await pool.query(query, [status, correoOrId]);
+
+        console.log(`Query ejecutada: ${query}`);
+        console.log(`Valores: status=${status}, correoOrId=${correoOrId}`);
+        console.log(`Resultado: affectedRows=${result.affectedRows}`);
 
         if (result.affectedRows === 0) {
             throw new Error('Usuario no encontrado o estado no actualizado');
         }
     }
-
 
     // Operaciones relacionadas con la tabla `eventos_procesados`
     async isEventProcessed(eventId: string): Promise<boolean> {

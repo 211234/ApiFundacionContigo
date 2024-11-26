@@ -27,7 +27,7 @@ async function connect() {
             if (retries === 0) {
                 throw error;
             }
-            await new Promise(res => setTimeout(res, 5000)); // Reintenta en 5 segundos
+            await new Promise(res => setTimeout(res, 5000));
         }
     }
 }

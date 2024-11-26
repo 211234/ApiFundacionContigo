@@ -18,8 +18,8 @@ export class UserRepositoryImpl implements UserRepository {
         return users.length === 0;
     }
 
-    async updateVerificationStatus(correo: string, status: 'pendiente' | 'confirmado'): Promise<void> {
-        await this.userRepo.update(correo, { estado_verificacion: status });
+    async updateVerificationStatus(correoOrId: string, status: 'pendiente' | 'confirmado', findByEmail: boolean): Promise<void> {
+        await this.userRepo.update({ correo: correoOrId }, { estado_verificacion: status });
     }
 
     async createUser(user: User): Promise<User> {
@@ -40,5 +40,21 @@ export class UserRepositoryImpl implements UserRepository {
         if (result.affected === 0) {
             throw new Error('User not found or already deleted');
         }
+    }
+    
+    public async confirmUser(userId: string): Promise<{ id_usuario: string; nombre: string; correo: string } | null> {
+        const user = await this.userRepo.findOne({ where: { id_usuario: userId } });
+        if (!user) {
+            return null;
+        }
+
+        user.estado_verificacion = 'confirmado';
+        await this.userRepo.save(user);
+
+        return {
+            id_usuario: user.id_usuario,
+            nombre: user.nombre,
+            correo: user.correo,
+        };
     }
 }

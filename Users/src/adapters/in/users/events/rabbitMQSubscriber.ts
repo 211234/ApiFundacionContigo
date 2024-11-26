@@ -1,14 +1,15 @@
 import amqp from 'amqplib';
 import { UserService } from '../../../../core/users/services/servicesUser';
+import { EventRepository } from '../../../../core/users/repositories/eventRepository';
 
 export class RabbitMQSubscriber {
     private connection!: amqp.Connection;
     private channel!: amqp.Channel;
     private readonly exchangeName = 'userEventsExchange';
     private readonly queueName = 'userConfirmedQueue';
-    private readonly eventRepository: any;
+    private readonly eventRepository: EventRepository;
 
-    constructor(private readonly userService: UserService, eventRepository: any) {
+    constructor(private readonly userService: UserService, eventRepository: EventRepository) {
         this.eventRepository = eventRepository;
         this.connect();
     }
@@ -29,16 +30,16 @@ export class RabbitMQSubscriber {
                     try {
                         const message = JSON.parse(msg.content.toString());
                         console.log(`Received event: ${message.event}`);
-            
+
                         if (message.event === 'USER_CONFIRMED') {
                             await this.handleUserConfirmed(message.data.id_usuario, message.data.eventId);
                         }
-            
+
                         // Confirmar que el mensaje se procesó correctamente
                         this.channel.ack(msg);
                     } catch (error) {
                         console.error('Error processing message:', error);
-            
+
                         if (msg.fields.redelivered) {
                             console.log('Mensaje redelivered. Enviando a DLQ...');
                             this.channel.reject(msg, false); // Mueve el mensaje a la DLQ
@@ -49,7 +50,7 @@ export class RabbitMQSubscriber {
                     }
                 }
             });
-            
+
 
             console.log('RabbitMQ Subscriber connected and listening for USER_CONFIRMED events ✅');
         } catch (error) {
@@ -66,17 +67,19 @@ export class RabbitMQSubscriber {
                 console.log(`Evento ${eventId} ya fue procesado. Ignorando.`);
                 return;
             }
-    
+
             // Actualizar el estado de verificación del usuario
-            await this.userService.updateVerificationStatus(id_usuario, 'confirmado');
-    
+            console.log(`Procesando confirmación de usuario con ID: ${id_usuario}`);
+            await this.userService.updateVerificationStatus(id_usuario, 'confirmado', false);
+            console.log(`Usuario ${id_usuario} confirmado exitosamente`);
+
             // Registrar evento como procesado
             await this.eventRepository.saveEvent(eventId, 'USER_CONFIRMED');
             console.log(`Evento ${eventId} procesado exitosamente.`);
         } catch (error) {
             console.error(`Error procesando el evento ${eventId}:`, error);
         }
-    }    
+    }
 
     public async close(): Promise<void> {
         if (this.channel) await this.channel.close();
