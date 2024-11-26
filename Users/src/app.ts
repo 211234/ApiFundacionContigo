@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRoutes from './adapters/in/users/userRoutes';
+import medicamentoRoutes from './adapters/in/medicamentos/medicamentoRoutes';
 import { RabbitMQConnection } from '../src/infrastructure/config/rabbitMQ';
 import { connect } from './infrastructure/config/database';
 import { env } from './infrastructure/config/env';
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api', userRoutes);
+app.use('/api', medicamentoRoutes);
 
 RabbitMQConnection.init();
 

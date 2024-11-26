@@ -18,6 +18,13 @@ export class MedicamentoRepository implements MedicamentoRepositoryPort {
         return medicamento;
     }
 
+    async getAll(): Promise<Medicamento[]> {
+        const [rows] = await pool.query(
+            `SELECT * FROM medicamentos`
+        );
+        return rows as Medicamento[];
+    }
+
     async findById(id: string): Promise<Medicamento | null> {
         const [rows] = await pool.query(  // Usa pool aquí también
             `SELECT * FROM medicamentos WHERE id_medicamento = ?`,

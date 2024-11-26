@@ -8,7 +8,8 @@ import {
     createMedicamentoController,
     getMedicamentoController,
     updateMedicamentoController,
-    deleteMedicamentoController
+    deleteMedicamentoController,
+    getAllMedicamentosController
 } from './medicamentoDependencies';
 
 import {
@@ -24,7 +25,7 @@ import { validateResults } from '../../../infrastructure/middlewares/validationM
 const router = Router();
 
 router.post(
-    '/medicamentos',
+    '/v1/medicamentos',
     authMiddleware, // Primero verifica autenticación
     isPadreMiddleware, // Después verifica si es un Padre
     medicamentoValidationRules, // Valida la entrada
@@ -34,14 +35,21 @@ router.post(
 );
 
 router.get(
-    '/medicamentos/:id',
+    '/v1/medicamentos/:id',
     authMiddleware,
     isPadreMiddleware,
     (req: Request, res: Response, next: NextFunction) => getMedicamentoController.handle(req, res, next)
 );
 
+router.get(
+    '/v1/medicamentos',
+    authMiddleware,
+    isPadreMiddleware,
+    (req: Request, res: Response, next: NextFunction) => getAllMedicamentosController.handle(req, res, next)
+);
+
 router.put(
-    '/medicamentos/:id',
+    '/v1/medicamentos/:id',
     authMiddleware,
     isPadreMiddleware,
     medicamentoValidationRulesUpdate,
@@ -51,7 +59,7 @@ router.put(
 );
 
 router.delete(
-    '/medicamentos/:id',
+    '/v1/medicamentos/:id',
     authMiddleware,
     isPadreMiddleware,
     auditMedicamentoMiddleware('BORRAR', (req: AuthRequest) => `El usuario ${req.user?.id_usuario} eliminó el medicamento con ID ${req.params.id}`),

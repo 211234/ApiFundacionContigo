@@ -11,6 +11,10 @@ export class MedicamentoRepositoryImpl implements MedicamentoRepositoryPort {
     return await this.medicamentoRepo.findOne({ where: { id_medicamento } });
   }
 
+  async getAll(): Promise<Medicamento[]> {
+    return await this.medicamentoRepo.find();
+  }
+
   async create(medicamento: Medicamento): Promise<Medicamento> {
     return await this.medicamentoRepo.save(medicamento);
   }

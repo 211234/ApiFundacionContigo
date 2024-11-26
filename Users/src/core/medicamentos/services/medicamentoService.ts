@@ -34,6 +34,10 @@ export class MedicamentoService {
         return savedMedicamento;
     }
 
+    async getAllMedicamentos(): Promise<Medicamento[]> {
+        return await this.medicamentoRepository.getAll();
+    }
+
     async getMedicamentoById(id: string): Promise<Medicamento | null> {
         return await this.medicamentoRepository.findById(id);
     }
