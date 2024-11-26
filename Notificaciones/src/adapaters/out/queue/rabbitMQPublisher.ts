@@ -6,6 +6,6 @@ export class RabbitMQPublisher {
 
         const event = { type: eventType, payload };
         channel.publish('userEventsExchange', '', Buffer.from(JSON.stringify(event)));
-        console.log(`Published event: ${eventType}`, payload);
+        console.log(`Evento publicado: ${eventType}, payload:`, payload);
     }
 }
