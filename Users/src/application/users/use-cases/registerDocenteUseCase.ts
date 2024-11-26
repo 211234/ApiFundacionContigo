@@ -5,14 +5,12 @@ import { RegisterDocenteDTO } from '../../../adapters/in/users/dtos/registerDoce
 import { Docente } from '../../../core/users/domain/docenteEntity';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../../../core/users/domain/userEntity';
-import { AuditService } from '../../../core/users/services/auditService';
 
 export class RegisterDocenteUseCase {
     constructor(
         private readonly userRepository: UserRepositoryPort,
-        private readonly docenteRepository: DocenteRepositoryPort,
-        private readonly auditService: AuditService // Añade el servicio de auditoría
-    ) {}
+        private readonly docenteRepository: DocenteRepositoryPort
+    ) { }
 
     async execute(docenteDTO: RegisterDocenteDTO): Promise<Docente> {
         // Verifica si el usuario es administrador
@@ -41,16 +39,6 @@ export class RegisterDocenteUseCase {
 
         // Registra el docente en `docentes`
         const docente = new Docente(uuidv4(), nuevoUsuarioId, docenteDTO.materia, docenteDTO.direccion);
-        const docenteCreado = await this.docenteRepository.createDocente(docente);
-
-        // Registra la acción en la auditoría
-        await this.auditService.createAuditLog({
-            id_usuario: docenteDTO.id_usuario,
-            accion: 'CREAR',
-            entidad_afectada: 'docentes',
-            id_entidad: docenteCreado.id_docente,
-        });
-
-        return docenteCreado;
+        return await this.docenteRepository.createDocente(docente);
     }
 }

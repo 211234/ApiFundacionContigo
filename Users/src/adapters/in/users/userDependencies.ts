@@ -54,7 +54,7 @@ const updateUserUseCase = new UpdateUserUseCase(userRepository, auditService);
 const loginUserUseCase = new LoginUserUseCase(userRepository, userService);
 const userAuditUseCase = new UserAuditUseCase(userService, auditService);
 
-const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository, auditService);
+const registerDocenteUseCase = new RegisterDocenteUseCase(userRepository, docenteRepository);
 const registerHijoUseCase = new RegisterHijoUseCase(userRepository, hijoRepository, auditService);
 const updateHijoUseCase = new UpdateHijoUseCase(hijoRepository);
 const updateDocenteUseCase = new UpdateDocenteUseCase(docenteRepository);
@@ -66,7 +66,7 @@ export const readUserController = new ReadUserController(readUserUseCase);
 export const updateUserController = new UpdateUserController(updateUserUseCase);
 export const loginUserController = new LoginUserController(loginUserUseCase, userAuditUseCase);
 
-export const registerDocenteController = new RegisterDocenteController(registerDocenteUseCase, docenteRepository);
+export const registerDocenteController = new RegisterDocenteController(registerDocenteUseCase, auditService);
 export const registerNiñoController = new RegisterHijoController(registerHijoUseCase);
 export const updateNiñoController = new UpdateHijoController(updateHijoUseCase);
 export const updateDocenteController = new UpdateDocenteController(updateDocenteUseCase);
