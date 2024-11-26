@@ -12,4 +12,9 @@ export class TokenRepository {
     async markTokenAsUsed(tokenId: string): Promise<void> {
         await TokenModel.findByIdAndUpdate(tokenId, { usado: true });
     }
+
+    public async findByUsuarioAndCodigo(id_usuario: string, codigo: string): Promise<IToken | null> {
+        const token = await TokenModel.findOne({ id_usuario, codigo });
+        return token || null;
+    }
 }

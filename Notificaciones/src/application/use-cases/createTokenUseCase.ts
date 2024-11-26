@@ -75,4 +75,8 @@ export class CreateTokenUseCase {
     async markTokenAsUsed(tokenId: string): Promise<void> {
         await this.tokenRepository.markTokenAsUsed(tokenId);
     }
+
+    public async getTokenByUsuarioAndCodigo(id_usuario: string, codigo: string) {
+        return await this.tokenRepository.findByUsuarioAndCodigo(id_usuario, codigo);
+    }    
 }
