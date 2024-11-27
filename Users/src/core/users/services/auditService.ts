@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface AuditData {
     id_usuario: string;
-    accion: 'CREAR' | 'ACTUALIZAR' | 'BORRAR' | 'LOGIN' | 'LOGOUT' | 'ACTUALIZAR_ESTADO_VERIFICACION';
-    entidad_afectada: 'usuarios' | 'hijos' | 'docentes' | 'medicamentos' | 'citas_medicas' | 'alimentos' | 'actividades' | 'hilos_chat' | 'mensajes_chat';
+    accion: 'CREAR' | 'ACTUALIZAR' | 'BORRAR' | 'LOGIN' | 'LOGOUT' | 'ACTUALIZAR_ESTADO_VERIFICACION' | 'CREAR_HISTORIAL' | 'CONSULTAR';
+    entidad_afectada: 'usuarios' | 'hijos' | 'docentes' | 'medicamentos' | 'citas_medicas' | 'alimentos' | 'actividades' | 'hilos_chat' | 'mensajes_chat' | 'historial_citas_medicas';
     id_entidad: string;
 }
 
@@ -50,6 +50,8 @@ export class AuditService {
             case 'LOGIN': return `Usuario con ID ${idEntidad} inició sesión`;
             case 'LOGOUT': return `Usuario con ID ${idEntidad} cerró sesión`;
             case 'ACTUALIZAR_ESTADO_VERIFICACION': return `Estado de verificación actualizado para ${entidad} con ID ${idEntidad}`;
+            case 'CREAR_HISTORIAL': return `Historial creado para ${entidad} con ID ${idEntidad}`;
+            case 'CONSULTAR': return `Consulta realizada en ${entidad} con ID ${idEntidad}`;
             default: return 'Acción desconocida';
         }
     }

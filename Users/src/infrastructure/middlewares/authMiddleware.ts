@@ -138,3 +138,49 @@ export const auditMedicamentoMiddleware = (accion: string, descripcionCallback: 
         next();
     };
 };
+
+// Middleware de auditoría para citas médicas
+export const auditCitasMedicasMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
+    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const id_usuario = req.user?.id_usuario;
+
+        if (id_usuario) {
+            try {
+                await userAuditUseCase.auditUserAction({
+                    id_usuario,
+                    accion,
+                    entidad_afectada: 'citas_medicas',
+                    id_entidad: req.params.id || req.body.id_cita,
+                    descripcion: descripcionCallback(req), // Descripción dinámica
+                });
+            } catch (error) {
+                console.error("Error registrando acción de auditoría en citas médicas:", error);
+            }
+        }
+
+        next();
+    };
+};
+
+// Middleware de auditoría para historial de citas médicas
+export const auditHistorialCitasMedicasMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
+    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const id_usuario = req.user?.id_usuario;
+
+        if (id_usuario) {
+            try {
+                await userAuditUseCase.auditUserAction({
+                    id_usuario,
+                    accion,
+                    entidad_afectada: 'historial_citas_medicas',
+                    id_entidad: req.params.id || req.body.id_historial,
+                    descripcion: descripcionCallback(req), // Descripción dinámica
+                });
+            } catch (error) {
+                console.error("Error registrando acción de auditoría en historial de citas médicas:", error);
+            }
+        }
+
+        next();
+    };
+};

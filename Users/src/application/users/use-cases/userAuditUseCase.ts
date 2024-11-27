@@ -3,8 +3,8 @@ import { UserService } from '../../../core/users/services/servicesUser';
 
 interface UserActionData {
     id_usuario: string;
-    accion: 'CREAR' | 'ACTUALIZAR' | 'BORRAR' | 'LOGIN' | 'LOGOUT' | 'ACTUALIZAR_ESTADO_VERIFICACION';
-    entidad_afectada: 'usuarios' | 'hijos' | 'docentes' | 'medicamentos' | 'citas_medicas' | 'alimentos' | 'actividades' | 'hilos_chat' | 'mensajes_chat';
+    accion: 'CREAR' | 'ACTUALIZAR' | 'BORRAR' | 'LOGIN' | 'LOGOUT' | 'ACTUALIZAR_ESTADO_VERIFICACION' | 'CREAR_HISTORIAL'  | 'CONSULTAR';
+    entidad_afectada: 'usuarios' | 'hijos' | 'docentes' | 'medicamentos' | 'citas_medicas' | 'alimentos' | 'actividades' | 'hilos_chat' | 'mensajes_chat' | 'historial_citas_medicas';
     id_entidad: string;
 }
 
@@ -12,7 +12,7 @@ export class UserAuditUseCase {
     [x: string]: any;
     constructor(
         private userService: UserService,
-        private auditService: AuditService
+        private auditService: AuditService,
     ) { }
 
     async createUser(data: any) {
@@ -75,5 +75,15 @@ export class UserAuditUseCase {
             id_entidad: id_usuario,
         });
         console.log("Audit log created successfully in logoutUser");
+    }
+    async updateUserVerificationStatus(id_usuario: string, data: any) {
+        const updatedUser = await this.userService.updateVerificationStatus(id_usuario, data);
+        await this.auditService.createAuditLog({
+            id_usuario,
+            accion: 'ACTUALIZAR_ESTADO_VERIFICACION',
+            entidad_afectada: 'usuarios',
+            id_entidad: id_usuario,
+        });
+        return updatedUser;
     }
 }

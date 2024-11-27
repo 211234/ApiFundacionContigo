@@ -66,7 +66,7 @@ export class MedicamentoService {
         if (deleted) {
             // Registrar en auditoría
             await this.auditService.createAuditLog({
-                id_usuario: 'Sistema', // Ajusta esto según el contexto de quién realiza la acción
+                id_usuario: id, // Ajusta esto según el contexto de quién realiza la acción
                 accion: 'BORRAR',
                 entidad_afectada: 'medicamentos',
                 id_entidad: id
