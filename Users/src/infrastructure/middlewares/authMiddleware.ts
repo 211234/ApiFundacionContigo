@@ -162,8 +162,8 @@ export const auditCitasMedicasMiddleware = (accion: string, descripcionCallback:
     };
 };
 
-// Middleware de auditoría para historial de citas médicas
-export const auditHistorialCitasMedicasMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
+// Middleware de auditoría para alimentos
+export const auditAlimentosMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
     return async (req: AuthRequest, res: Response, next: NextFunction) => {
         const id_usuario = req.user?.id_usuario;
 
@@ -172,12 +172,12 @@ export const auditHistorialCitasMedicasMiddleware = (accion: string, descripcion
                 await userAuditUseCase.auditUserAction({
                     id_usuario,
                     accion,
-                    entidad_afectada: 'historial_citas_medicas',
-                    id_entidad: req.params.id || req.body.id_historial,
+                    entidad_afectada: 'alimentos',
+                    id_entidad: req.params.id || req.body.id_alimento,
                     descripcion: descripcionCallback(req), // Descripción dinámica
                 });
             } catch (error) {
-                console.error("Error registrando acción de auditoría en historial de citas médicas:", error);
+                console.error("Error registrando acción de auditoría en alimentos:", error);
             }
         }
 

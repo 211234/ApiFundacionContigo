@@ -4,6 +4,7 @@ import cors from 'cors';
 import userRoutes from './adapters/in/users/userRoutes';
 import medicamentoRoutes from './adapters/in/medicamentos/medicamentoRoutes';
 import citaMedicaRoutes from './adapters/in/citas/citaMedicaRoutes';
+import alimentosRoutes from './adapters/in/alimentos/alimentosRoutes';
 import { RabbitMQConnection } from '../src/infrastructure/config/rabbitMQ';
 import { connect } from './infrastructure/config/database';
 import { env } from './infrastructure/config/env';
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api', userRoutes);
 app.use('/api', medicamentoRoutes);
 app.use('/api', citaMedicaRoutes)
+app.use('/api', alimentosRoutes);
 
 RabbitMQConnection.init();
 
