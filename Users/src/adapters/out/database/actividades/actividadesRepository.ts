@@ -31,4 +31,19 @@ export class ActividadesRepository implements ActividadesRepositoryPort {
             multimedia_url: row.multimedia_url
         }));
     }
+
+    async findById(id_actividad: string): Promise<Actividad> {
+        const query = `
+            SELECT * FROM actividades WHERE id_actividad = ?
+        `;
+        const [rows]: [any[], any] = await pool.execute(query, [id_actividad]);
+        const row = rows[0];
+        return {
+            id_actividad: row.id_actividad,
+            id_docente: row.id_docente,
+            nombre: row.nombre,
+            instrucciones: row.instrucciones,
+            multimedia_url: row.multimedia_url
+        };
+    }
 }

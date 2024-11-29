@@ -26,8 +26,8 @@ const getPadresConHijosUseCase = new GetPadresConHijosUseCase(userRepository);
 const getActividadesByDocenteUseCase = new GetActividadesByDocenteUseCase(actividadesRepository);
 const getActividadesByUsuarioUseCase = new GetActividadesByUsuarioUseCase(estadoActividadesRepository);
 const updateEstadoActividadUseCase = new UpdateEstadoActividadUseCase(estadoActividadesRepository);
-const emailService = new EmailService(); // Assuming EmailService is imported and available
-const assignActividadUseCase = new AssignActividadUseCase(estadoActividadesRepository, userRepository, emailService);
+const emailService = new EmailService(); // Instancia del servicio de correos
+const assignActividadUseCase = new AssignActividadUseCase(estadoActividadesRepository, userRepository, emailService, actividadesRepository);
 const createActividadUseCase = new CreateActividadUseCase(actividadesRepository);
 
 // Controladores

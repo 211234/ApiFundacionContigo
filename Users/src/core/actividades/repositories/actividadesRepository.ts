@@ -13,4 +13,8 @@ export class ActividadesRepository implements ActividadesRepositoryPort {
     async getActividadesByDocente(id_docente: string): Promise<Actividad[]> {
         return await this.actividadesRepo.find({ where: { id_docente } });
     }
+
+    async findById(id_actividad: string): Promise<Actividad> {
+        return await this.actividadesRepo.findOne({ where: { id_actividad } });
+    }
 }
