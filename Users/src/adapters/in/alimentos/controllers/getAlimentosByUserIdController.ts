@@ -1,10 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { GetAlimentosByUserIdUseCase } from '../../../../application/alimentos/use-cases/getAlimentosByUserIdUseCase';
-import { AuditService } from '../../../../core/users/services/auditService';
-
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
 export class GetAlimentosByUserIdController {
     constructor(

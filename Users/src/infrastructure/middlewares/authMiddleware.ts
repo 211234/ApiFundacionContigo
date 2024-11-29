@@ -1,14 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../../core/users/domain/userEntity';
 import { env } from '../config/env';
-import { UserAuditUseCase } from '../../application/users/use-cases/userAuditUseCase';
-import { UserService } from '../../core/users/services/servicesUser';
-import { AuditService } from '../../core/users/services/auditService';
-import { UserRepository } from '../../adapters/out/database/users/userRepository';
-import { AuditRepository } from '../../adapters/out/database/users/auditRepository';
-import { pool } from '../config/database';
-import { LeadRepository } from '../../adapters/out/database/lead/leadRepository';
+import { AuthRequest } from '../../interfaces/authRequest';
 
 // Configuración de secreto JWT
 const secret = env.jwt.secret;
@@ -17,11 +10,7 @@ if (!secret) {
 }
 
 // Generar token
-export const generateToken = (user: User): string => {
-    const payload = {
-        id_usuario: user.id_usuario,
-        tipo: user.tipo,
-    };
+export const generateToken = (payload: object): string => {
     return jwt.sign(payload, secret, { expiresIn: '1h' });
 };
 
@@ -34,10 +23,6 @@ export const verifyToken = (token: string) => {
     }
 };
 
-// Tipo extendido de `Request` con `user`
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
 
 // Middleware de autenticación
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
@@ -56,131 +41,20 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     }
 };
 
-// Middleware para verificar si el usuario es administrador
-export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user || req.user.tipo !== 'Administrador') {
-        res.status(403).json({ message: 'Admin access only' });
-        return;
-    }
-    next();
-};
-
-export const isPadreMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
-    authMiddleware(req, res, () => {
-        if (!req.user || req.user.tipo !== 'Padre') {
-            res.status(403).json({ message: 'Solo acceso para usuarios de tipo Padre' });
-            return;
-        }
-        next();
-    });
-};
-
-
-// Middleware combinado para autenticación y verificación de administrador
-export const adminOnlyMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
-    authMiddleware(req, res, () => {
-        isAdmin(req, res, next);
-    });
-};
-
-const userRepository = new UserRepository();
-
-const auditRepository = new AuditRepository(pool, userRepository);
-const auditService = new AuditService(auditRepository);
-
-const leadRepository = new LeadRepository(); // Assuming LeadRepository is defined somewhere
-const userService = new UserService(userRepository, auditService, leadRepository);
-
-// Instancia de `UserAuditUseCase` reutilizando servicios ya creados
-const userAuditUseCase = new UserAuditUseCase(userService, auditService);
-
-// Middleware de auditoría corregido
-export const auditUserMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
-        const id_usuario = req.user?.id_usuario;
-
-        if (id_usuario) {
-            try {
-                await userAuditUseCase.auditUserAction({
-                    id_usuario,
-                    accion,
-                    entidad_afectada: 'usuarios',
-                    id_entidad: id_usuario,
-                    descripcion: descripcionCallback(req), // Descripción dinámica
-                });
-            } catch (error) {
-                console.error("Error registrando acción de auditoría:", error);
+// Middleware para verificar roles
+export const isRoleMiddleware = (role: string) => {
+    return (req: AuthRequest, res: Response, next: NextFunction): void => {
+        authMiddleware(req, res, () => {
+            if (!req.user || req.user.tipo !== role) {
+                res.status(403).json({ message: `Access restricted to ${role} users only` });
+                return;
             }
-        }
-
-        next();
+            next();
+        });
     };
 };
 
-export const auditMedicamentoMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
-        const id_usuario = req.user?.id_usuario;
-
-        if (id_usuario) {
-            try {
-                await userAuditUseCase.auditUserAction({
-                    id_usuario,
-                    accion,
-                    entidad_afectada: 'medicamentos',
-                    id_entidad: req.params.id || req.body.id_medicamento,
-                    descripcion: descripcionCallback(req), // Descripción dinámica
-                });
-            } catch (error) {
-                console.error("Error registrando acción de auditoría:", error);
-            }
-        }
-
-        next();
-    };
-};
-
-// Middleware de auditoría para citas médicas
-export const auditCitasMedicasMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
-        const id_usuario = req.user?.id_usuario;
-
-        if (id_usuario) {
-            try {
-                await userAuditUseCase.auditUserAction({
-                    id_usuario,
-                    accion,
-                    entidad_afectada: 'citas_medicas',
-                    id_entidad: req.params.id || req.body.id_cita,
-                    descripcion: descripcionCallback(req), // Descripción dinámica
-                });
-            } catch (error) {
-                console.error("Error registrando acción de auditoría en citas médicas:", error);
-            }
-        }
-
-        next();
-    };
-};
-
-// Middleware de auditoría para alimentos
-export const auditAlimentosMiddleware = (accion: string, descripcionCallback: (req: Request) => string) => {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
-        const id_usuario = req.user?.id_usuario;
-
-        if (id_usuario) {
-            try {
-                await userAuditUseCase.auditUserAction({
-                    id_usuario,
-                    accion,
-                    entidad_afectada: 'alimentos',
-                    id_entidad: req.params.id || req.body.id_alimento,
-                    descripcion: descripcionCallback(req), // Descripción dinámica
-                });
-            } catch (error) {
-                console.error("Error registrando acción de auditoría en alimentos:", error);
-            }
-        }
-
-        next();
-    };
-};
+// Alias para roles específicos
+export const isAdmin = isRoleMiddleware('Administrador');
+export const isPadreMiddleware = isRoleMiddleware('Padre');
+export const isDocenteMiddleware = isRoleMiddleware('Docente');

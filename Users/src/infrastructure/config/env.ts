@@ -1,6 +1,6 @@
-import { config } from "dotenv"
+import { config } from "dotenv";
 
-config()
+config();
 
 export const env = {
     port: process.env.PORT,
@@ -13,6 +13,12 @@ export const env = {
         connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
     },
     jwt: {
-        secret: process.env.JWT_SECRET
+        secret: process.env.JWT_SECRET,
     },
-}
+    email: {
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+    }
+};

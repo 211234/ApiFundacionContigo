@@ -17,4 +17,12 @@ export class DocenteRepositoryImpl implements DocenteRepositoryPort {
         }
         return updatedDocente;
     }
+
+    async delete(id_docente: string): Promise<void> {
+        await this.docenteRepo.delete(id_docente);
+    }
+
+    async getAllDocentes(): Promise<Docente[]> {
+        return await this.docenteRepo.find();
+    }
 }

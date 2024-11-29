@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { GetCitasByUserIdUseCase } from '../../../../application/citas/use-case/getCitasByUserIdUseCase';
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
 
 export class GetCitasByUserIdController {
     constructor(
@@ -14,7 +12,6 @@ export class GetCitasByUserIdController {
         try {
             const { id_usuario } = req.params;
 
-            // Obtener citas médicas del usuario
             const citas = await this.getCitasByUserIdUseCase.execute(id_usuario);
 
             res.json(citas);

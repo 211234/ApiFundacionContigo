@@ -1,10 +1,11 @@
+import { RegistroAuditoria } from '../../../core/users/domain/auditEntity';
 import { AuditService } from '../../../core/users/services/auditService';
 import { UserService } from '../../../core/users/services/servicesUser';
 
 interface UserActionData {
     id_usuario: string;
     accion: 'CREAR' | 'ACTUALIZAR' | 'BORRAR' | 'LOGIN' | 'LOGOUT' | 'ACTUALIZAR_ESTADO_VERIFICACION' | 'CREAR_HISTORIAL'  | 'CONSULTAR';
-    entidad_afectada: 'usuarios' | 'hijos' | 'docentes' | 'medicamentos' | 'citas_medicas' | 'alimentos' | 'actividades' | 'hilos_chat' | 'mensajes_chat' | 'historial_citas_medicas';
+    entidad_afectada: 'usuarios' | 'hijos' | 'docentes' | 'medicamentos' | 'citas_medicas' | 'alimentos' | 'actividades' | 'hilos_chat' | 'mensajes_chat';
     id_entidad: string;
 }
 
@@ -86,4 +87,19 @@ export class UserAuditUseCase {
         });
         return updatedUser;
     }
+
+    async getUserAuditLogs(id_usuario: string): Promise<RegistroAuditoria[]> {
+        // Obtener todos los registros de auditoría
+        const logs = await this.auditService.getAllAuditLogs();
+    
+        // Registrar acción de consulta
+        await this.auditService.createAuditLog({
+            id_usuario,
+            accion: 'CONSULTAR',
+            entidad_afectada: 'usuarios',
+            id_entidad: id_usuario,
+        });
+    
+        return logs;
+    }    
 }

@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { CreateCitaMedicaUseCase } from '../../../../application/citas/use-case/createCitaMedicaUseCase';
 import { AuditService } from '../../../../core/users/services/auditService';
-
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
 export class CreateCitaMedicaController {
     constructor(
@@ -16,10 +13,8 @@ export class CreateCitaMedicaController {
         try {
             const { id_usuario, fecha_cita, observaciones, recordatorio } = req.body;
 
-            // Crear la cita médica
             const cita = await this.createCitaMedicaUseCase.execute({ id_usuario, fecha_cita, observaciones, recordatorio });
 
-            // Registrar en auditoría
             await this.auditService.createAuditLog({
                 id_usuario: id_usuario,
                 accion: 'CREAR',

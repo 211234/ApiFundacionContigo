@@ -29,6 +29,10 @@ import { TokenService } from '../../../core/users/services/tokenService';
 import { ConfirmAccountController } from './controllers/confirmAccountController';
 import { pool } from '../../../infrastructure/config/database';
 import { LeadRepository } from '../../out/database/lead/leadRepository';
+import { GetAllDocentesUseCase } from '../../../application/users/use-cases/getAllDocentesUseCase';
+import { DeleteDocenteUseCase } from '../../../application/users/use-cases/deleteDocenteUseCase';
+import { GetAllDocentesController } from './controllers/getAllDocentesController';
+import { DeleteDocenteController } from './controllers/deleteDocenteController';
 
 // Crear instancias de repositorios
 const userRepository = new UserRepository();
@@ -75,3 +79,10 @@ export const updateDocenteController = new UpdateDocenteController(updateDocente
 export const auditController = new AuditController(auditService);
 
 export const confirmAccountController = new ConfirmAccountController(tokenService, userService);
+
+// Nuevas instancias para docentes
+const getAllDocentesUseCase = new GetAllDocentesUseCase(docenteRepository);
+const deleteDocenteUseCase = new DeleteDocenteUseCase(docenteRepository);
+
+export const getAllDocentesController = new GetAllDocentesController(getAllDocentesUseCase);
+export const deleteDocenteController = new DeleteDocenteController(deleteDocenteUseCase);

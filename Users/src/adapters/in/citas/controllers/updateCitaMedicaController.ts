@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { UpdateCitaMedicaUseCase } from '../../../../application/citas/use-case/updateCitaMedicaUseCase';
 import { AuditService } from '../../../../core/users/services/auditService';
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
 
 export class UpdateCitaMedicaController {
     constructor(
@@ -17,7 +15,6 @@ export class UpdateCitaMedicaController {
             const { id_cita } = req.params;
             const { id_usuario, fecha_cita, observaciones, recordatorio } = req.body;
 
-            // Actualizar la cita médica
             await this.updateCitaMedicaUseCase.execute({
                 id_cita,
                 id_usuario,
@@ -26,7 +23,6 @@ export class UpdateCitaMedicaController {
                 recordatorio,
             });
 
-            // Registrar en auditoría
             await this.auditService.createAuditLog({
                 id_usuario: id_usuario,
                 accion: 'ACTUALIZAR',

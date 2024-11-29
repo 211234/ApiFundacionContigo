@@ -5,6 +5,7 @@ import userRoutes from './adapters/in/users/userRoutes';
 import medicamentoRoutes from './adapters/in/medicamentos/medicamentoRoutes';
 import citaMedicaRoutes from './adapters/in/citas/citaMedicaRoutes';
 import alimentosRoutes from './adapters/in/alimentos/alimentosRoutes';
+import actividadRoutes from './adapters/in/actividades/actividadRoutes';
 import { RabbitMQConnection } from '../src/infrastructure/config/rabbitMQ';
 import { connect } from './infrastructure/config/database';
 import { env } from './infrastructure/config/env';
@@ -21,6 +22,7 @@ app.use('/api', userRoutes);
 app.use('/api', medicamentoRoutes);
 app.use('/api', citaMedicaRoutes)
 app.use('/api', alimentosRoutes);
+app.use('/api', actividadRoutes);
 
 RabbitMQConnection.init();
 

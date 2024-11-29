@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { MedicamentoService } from '../../../../core/medicamentos/services/medicamentoService';
 import { AuditService } from '../../../../core/users/services/auditService';
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
 
 export class CreateMedicamentoController {
     constructor(

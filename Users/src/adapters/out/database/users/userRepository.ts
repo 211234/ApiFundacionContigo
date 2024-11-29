@@ -139,4 +139,43 @@ export class UserRepository implements UserRepositoryPort {
             throw new Error('User not found or already deleted');
         }
     }
+
+    async getPadresConHijos(): Promise<any[]> {
+        const query = `
+            SELECT 
+                u.id_usuario AS id_padre, 
+                u.nombre AS nombre_padre, 
+                u.correo AS correo_padre, 
+                h.id_hijo, 
+                h.nombre AS nombre_hijo, 
+                h.fecha_nacimiento 
+            FROM usuarios u
+            LEFT JOIN hijos h ON u.id_usuario = h.id_usuario
+            WHERE u.tipo = 'Padre'
+        `;
+
+        const [rows]: [any[], any] = await pool.execute(query);
+
+        // Organizar la respuesta para que sea un arreglo de padres con sus hijos
+        const padresConHijos = rows.reduce((acc, row) => {
+            let padre = acc.find((p: any) => p.id_padre === row.id_padre);
+            if (!padre) {
+                padre = {
+                    id_padre: row.id_padre,
+                    nombre_padre: row.nombre_padre,
+                    correo_padre: row.correo_padre,
+                    hijos: []
+                };
+                acc.push(padre);
+            }
+            padre.hijos.push({
+                id_hijo: row.id_hijo,
+                nombre_hijo: row.nombre_hijo,
+                fecha_nacimiento: row.fecha_nacimiento
+            });
+            return acc;
+        }, []);
+
+        return padresConHijos;
+    }
 }

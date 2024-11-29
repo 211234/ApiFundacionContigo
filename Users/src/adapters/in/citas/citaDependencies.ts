@@ -23,7 +23,7 @@ const deleteCitaMedicaUseCase = new DeleteCitaMedicaUseCase(citaMedicaRepository
 
 // Controladores
 export const createCitaMedicaController = new CreateCitaMedicaController(createCitaMedicaUseCase, auditService);
-export const getCitasByUserIdController = new GetCitasByUserIdController(getCitasByUserIdUseCase, auditService);
+export const getCitasByUserIdController = new GetCitasByUserIdController(getCitasByUserIdUseCase);
 export const updateCitaMedicaController = new UpdateCitaMedicaController(updateCitaMedicaUseCase, auditService);
 export const deleteCitaMedicaController = new DeleteCitaMedicaController(deleteCitaMedicaUseCase, auditService);
 

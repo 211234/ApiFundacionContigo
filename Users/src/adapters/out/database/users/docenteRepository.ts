@@ -36,4 +36,16 @@ export class DocenteRepository implements DocenteRepositoryPort {
         );
         return this.findById(id_docente);
     }
+
+    async getAllDocentes(): Promise<Docente[]> {
+        const [rows]: [any[], any] = await pool.query('SELECT * FROM docentes');
+        return rows as Docente[];
+    }
+
+    async delete(id_docente: string): Promise<void> {
+        const [result]: any = await pool.query('DELETE FROM docentes WHERE id_docente = ?', [id_docente]);
+        if (result.affectedRows === 0) {
+            throw new Error('Docente no encontrado o ya eliminado');
+        }
+    }
 }

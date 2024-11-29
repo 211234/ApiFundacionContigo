@@ -148,19 +148,21 @@ export class UserService {
         });
     }
 
-    // Iniciar sesión del usuario (esto puede necesitar mejoras)
-    async loginUser(id: string): Promise<User | null> {
-        return await this.userRepository.findById(id);
-    }
-
-    // Cerrar sesión del usuario (si es necesario implementar lógica adicional)
-    async logoutUser(id: string): Promise<void> {
-        // Registrar auditoría para el logout si decides implementarlo
+    async loginUser(id_usuario: string) {
         await this.auditService.createAuditLog({
-            id_usuario: id,
+            id_usuario,
+            accion: 'LOGIN',
+            entidad_afectada: 'usuarios',
+            id_entidad: id_usuario,
+        });
+    }
+    
+    async logoutUser(id_usuario: string) {
+        await this.auditService.createAuditLog({
+            id_usuario,
             accion: 'LOGOUT',
             entidad_afectada: 'usuarios',
-            id_entidad: id,
+            id_entidad: id_usuario,
         });
     }
 }

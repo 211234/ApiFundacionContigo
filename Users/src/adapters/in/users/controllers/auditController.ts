@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
 import { AuditService } from '../../../../core/users/services/auditService';
 import { AuditLogDTO } from '../../../../adapters/in/users/dtos/auditLogDto';
-
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
 export class AuditController {
     constructor(private auditService: AuditService) {}

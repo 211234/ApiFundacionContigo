@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { CreateAlimentoUseCase } from '../../../../application/alimentos/use-cases/createAlimentoUseCase';
 import { AuditService } from '../../../../core/users/services/auditService';
-
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
 export class CreateAlimentoController {
     constructor(

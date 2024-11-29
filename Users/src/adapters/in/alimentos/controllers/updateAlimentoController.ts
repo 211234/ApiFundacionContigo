@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { UpdateAlimentoUseCase } from '../../../../application/alimentos/use-cases/updateAlimentoUseCase';
 import { AuditService } from '../../../../core/users/services/auditService';
-
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
 export class UpdateAlimentoController {
     constructor(
@@ -17,10 +14,8 @@ export class UpdateAlimentoController {
             const { id_alimento } = req.params;
             const { id_usuario, nombre, categoria, horario } = req.body;
 
-            // Actualizar el alimento
             await this.updateAlimentoUseCase.execute(id_alimento, { id_alimento, id_usuario, nombre, categoria, horario });
 
-            // Registrar en auditoría
             await this.auditService.createAuditLog({
                 id_usuario: id_usuario,
                 accion: 'ACTUALIZAR',

@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { DeleteCitaMedicaUseCase } from '../../../../application/citas/use-case/deleteCitaMedicaUseCase';
 import { AuditService } from '../../../../core/users/services/auditService';
+import { AuthRequest } from '../../../../interfaces/authRequest';
 
-interface AuthRequest extends Request {
-    user?: { id_usuario: string; tipo: string };
-}
 
 export class DeleteCitaMedicaController {
     constructor(
@@ -16,10 +14,8 @@ export class DeleteCitaMedicaController {
         try {
             const { id_cita } = req.params;
 
-            // Eliminar la cita médica
             await this.deleteCitaMedicaUseCase.execute(id_cita);
 
-            // Registrar en auditoría
             await this.auditService.createAuditLog({
                 id_usuario: req.user?.id_usuario || 'Sistema',
                 accion: 'BORRAR',
