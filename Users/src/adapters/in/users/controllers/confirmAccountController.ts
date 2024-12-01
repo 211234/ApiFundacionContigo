@@ -21,9 +21,7 @@ export class ConfirmAccountController {
     
             // Actualiza el estado utilizando el correo
             await this.userService.updateVerificationStatus(correo, 'confirmado', true);
-    
-            // Eliminar el lead asociado al correo confirmado
-            await this.userService.deleteLeadByEmail(correo);
+
     
             res.status(200).json({ message: 'Cuenta confirmada y lead eliminado exitosamente' });
         } catch (error) {

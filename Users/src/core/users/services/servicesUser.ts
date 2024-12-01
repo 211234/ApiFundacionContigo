@@ -1,5 +1,4 @@
 import { UserRepositoryPort } from '../../../application/users/ports/userRepositoryPort';
-import { LeadRepositoryPort } from '../../../application/lead/ports/leadRepositoryPort';
 import { RegisterUserDTO } from '../../../adapters/in/users/dtos/registerUserDto';
 import { UpdateUserDTO } from '../../../adapters/in/users/dtos/updateUserDto';
 import { User } from '../domain/userEntity';
@@ -11,7 +10,6 @@ export class UserService {
     constructor(
         private readonly userRepository: UserRepositoryPort,
         private readonly auditService: AuditService,
-        private readonly leadRepository: LeadRepositoryPort
     ) { }
 
     async hashPassword(password: string): Promise<string> {
@@ -50,16 +48,6 @@ export class UserService {
     // Buscar un usuario por ID
     async findUserById(id: string): Promise<User | null> {
         return await this.userRepository.findById(id);
-    }
-
-    async deleteLeadByEmail(correo: string): Promise<void> {
-        try {
-            await this.leadRepository.deleteByEmail(correo);
-            console.log(`Lead con correo ${correo} eliminado correctamente.`);
-        } catch (error) {
-            console.error(`Error al eliminar lead con correo ${correo}:`, error);
-            throw new Error('No se pudo eliminar el lead asociado.');
-        }
     }
 
     async verifyUser(idOrEmail: string, searchByEmail = false): Promise<void> {
