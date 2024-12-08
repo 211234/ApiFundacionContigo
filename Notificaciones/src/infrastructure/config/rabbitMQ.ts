@@ -1,11 +1,12 @@
 import amqp from 'amqplib';
 
 export const rabbitMQConfig = {
-    url: process.env.RABBITMQ_URL || '',
-    userExchange: 'userEventsExchange',
-    notificationQueue: 'notificationsQueue',
-    deadLetterExchange: 'deadLetterExchange', // DLX para manejar mensajes muertos
-    deadLetterQueue: 'deadLetterQueue', // DLQ para mensajes no procesados
+    url: process.env.RABBITMQ_URL || 'amqp://localhost',
+    notificationExchange: 'notificationEventsExchange', // Debe coincidir con User
+    paymentNotificationQueue: 'paymentNotificationQueue',
+    userConfirmationQueue: 'userConfirmationQueue',
+    deadLetterExchange: 'deadLetterExchange',
+    deadLetterQueue: 'deadLetterQueue',
 };
 
 
@@ -22,16 +23,25 @@ export class RabbitMQConnection {
                 this.channel = await this.connection.createChannel();
                 console.log('Canal de RabbitMQ creado ✅');
 
-                // Asegurar el exchange y demás configuraciones
-                await this.channel.assertExchange(rabbitMQConfig.userExchange, 'fanout', { durable: false });
-                console.log(`Exchange '${rabbitMQConfig.userExchange}' asegurado ✅`);
+                // Asegurar el exchange
+                await this.channel.assertExchange(rabbitMQConfig.notificationExchange, 'fanout', { durable: false });
+                console.log(`Exchange '${rabbitMQConfig.notificationExchange}' asegurado ✅`);
 
-                // Asegurar la cola
-                await this.channel.assertQueue(rabbitMQConfig.notificationQueue, { durable: true });
-                console.log(`Cola '${rabbitMQConfig.notificationQueue}' asegurada ✅`);
+                // Asegurar la cola paymentNotificationQueue
+                await this.channel.assertQueue(rabbitMQConfig.paymentNotificationQueue, { durable: true });
+                console.log(`Cola '${rabbitMQConfig.paymentNotificationQueue}' asegurada ✅`);
 
-                await this.channel.bindQueue(rabbitMQConfig.notificationQueue, rabbitMQConfig.userExchange, '');
-                console.log(`Cola '${rabbitMQConfig.notificationQueue}' vinculada al exchange principal ✅`);
+                // Asegurar la cola userConfirmationQueue
+                await this.channel.assertQueue(rabbitMQConfig.userConfirmationQueue, { durable: true });
+                console.log(`Cola '${rabbitMQConfig.userConfirmationQueue}' asegurada ✅`);
+
+                // Vincular la cola al exchange
+                await this.channel.bindQueue(rabbitMQConfig.paymentNotificationQueue, rabbitMQConfig.notificationExchange, '');
+                console.log(`Cola '${rabbitMQConfig.paymentNotificationQueue}' vinculada al exchange '${rabbitMQConfig.notificationExchange}' ✅`);
+
+                // Vincula la nueva cola al exchange
+                await this.channel.bindQueue(rabbitMQConfig.userConfirmationQueue, rabbitMQConfig.notificationExchange, '');
+                console.log(`Cola '${rabbitMQConfig.userConfirmationQueue}' vinculada al exchange '${rabbitMQConfig.notificationExchange}' ✅`);
             }
 
             return this.channel; // Devolver el canal correctamente

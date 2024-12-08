@@ -24,6 +24,9 @@ const initServices = async () => {
         await connectMongoDB();
         console.log('MongoDB connected successfully ✅');
 
+        await RabbitMQConnection.init(); // Asegúrate de inicializar antes de usarlo
+        console.log('RabbitMQ initialized successfully ✅');
+
         await rabbitMQSubscriber.subscribe();
         console.log('RabbitMQ subscriber initialized ✅');
 
