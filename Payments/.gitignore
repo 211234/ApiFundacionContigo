@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+
+# Dist folder
+dist/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# TypeScript cache
+*.tsbuildinfo
+
+# IDE specific files
+.vscode/
+.idea/
