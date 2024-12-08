@@ -18,7 +18,7 @@ export class UserRepositoryImpl implements UserRepository {
         return users.length === 0;
     }
 
-    async updateVerificationStatus(correoOrId: string, status: 'pendiente' | 'confirmado', findByEmail: boolean): Promise<void> {
+    async updateVerificationStatus(correoOrId: string, status: 'pendiente' | 'confirmado'): Promise<void> {
         await this.userRepo.update({ correo: correoOrId }, { estado_verificacion: status });
     }
 

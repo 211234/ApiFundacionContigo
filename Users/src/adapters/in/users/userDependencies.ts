@@ -32,6 +32,9 @@ import { GetAllDocentesUseCase } from '../../../application/users/use-cases/getA
 import { DeleteDocenteUseCase } from '../../../application/users/use-cases/deleteDocenteUseCase';
 import { GetAllDocentesController } from './controllers/getAllDocentesController';
 import { DeleteDocenteController } from './controllers/deleteDocenteController';
+import { DonationController } from './controllers/donationController';
+import { CaptureDonationUseCase } from '../../../application/users/use-cases/captureDonationUseCase';
+import { CreateDonationUseCase } from '../../../application/users/use-cases/createDonationUseCase';
 
 // Crear instancias de repositorios
 const userRepository = new UserRepository();
@@ -84,3 +87,8 @@ const deleteDocenteUseCase = new DeleteDocenteUseCase(docenteRepository);
 
 export const getAllDocentesController = new GetAllDocentesController(getAllDocentesUseCase);
 export const deleteDocenteController = new DeleteDocenteController(deleteDocenteUseCase);
+
+// Instancias para donaciones
+const createDonationUseCase = new CreateDonationUseCase(rabbitMQPublisher);
+const captureDonationUseCase = new CaptureDonationUseCase(rabbitMQPublisher);
+export const donationController = new DonationController(createDonationUseCase, captureDonationUseCase);

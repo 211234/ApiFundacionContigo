@@ -10,15 +10,15 @@ export class ConfirmUserAccountUseCase {
         this.userRepository = userRepository;
     }
 
-    public async execute(userId: string): Promise<void> {
+    public async execute(id_usuario: string): Promise<void> {
         // Confirmar el usuario en la base de datos
-        const user = await this.userRepository.confirmUser(userId);
+        const user = await this.userRepository.confirmUser(id_usuario);
 
         if (!user) {
-            throw new Error(`User with ID ${userId} not found`);
+            throw new Error(`User with ID ${id_usuario} not found`);
         }
 
-        console.log(`User ${userId} confirmed`);
+        console.log(`User ${id_usuario} confirmed`);
 
         // Publicar el evento USER_CONFIRMED
         await this.eventPublisher.publish('USER_CONFIRMED', {

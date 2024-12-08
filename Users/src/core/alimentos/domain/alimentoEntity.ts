@@ -4,6 +4,6 @@ export class Alimento {
         public readonly id_usuario: string,
         public readonly nombre: string,
         public readonly categoria: 'Desayuno' | 'Comida' | 'Cena' | 'Entrémes',
-        public readonly horario: string // Formato TIME (HH:MM:SS)
+        public readonly horario: string 
     ) { }
 }

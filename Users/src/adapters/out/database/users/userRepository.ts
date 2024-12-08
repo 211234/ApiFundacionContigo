@@ -14,7 +14,10 @@ export class UserRepository implements UserRepositoryPort {
 
     async findByEmail(correo: string): Promise<User | null> {
         const [rows]: [any[], any] = await pool.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
-        return rows.length > 0 ? rows[0] : null;
+        if (rows.length === 0) {
+            return null;
+        }
+        return rows[0] as User;
     }
 
     async createUser(user: User): Promise<User> {
@@ -31,12 +34,15 @@ export class UserRepository implements UserRepositoryPort {
         return rows.length === 0;
     }
 
-    async findById(id: string): Promise<User | null> {
-        const [rows]: [any[], any] = await pool.query('SELECT * FROM usuarios WHERE id_usuario = ?', [id]);
-        return rows.length > 0 ? rows[0] : null;
+    async findById(id_usuario: string): Promise<User | null> {
+        const [rows]: [any[], any] = await pool.query('SELECT * FROM usuarios WHERE id_usuario = ?', [id_usuario]);
+        if (rows.length === 0) {
+            return null;
+        }
+        return rows[0] as User;
     }
 
-    async updateUser(id: string, updateData: UpdateUserDTO): Promise<User> {
+    async updateUser(id_usuario: string, updateData: UpdateUserDTO): Promise<User> {
         // Construir dinámicamente la consulta y los valores
         const fieldsToUpdate = [];
         const values = [];
@@ -64,7 +70,7 @@ export class UserRepository implements UserRepositoryPort {
         }
 
         // Agregar el ID al final de los valores
-        values.push(id);
+        values.push(id_usuario);
 
         const query = `UPDATE usuarios SET ${fieldsToUpdate.join(', ')} WHERE id_usuario = ?`;
 
@@ -72,7 +78,7 @@ export class UserRepository implements UserRepositoryPort {
         await pool.query(query, values);
 
         // Buscar y devolver el usuario actualizado
-        const updatedUser = await this.findById(id);
+        const updatedUser = await this.findById(id_usuario);
         if (!updatedUser) {
             throw new Error('User not found after update');
         }
@@ -80,10 +86,10 @@ export class UserRepository implements UserRepositoryPort {
         return updatedUser;
     }
 
-    async confirmUser(userId: string): Promise<{ id_usuario: string; nombre: string; correo: string } | null> {
+    async confirmUser(id_usuario: string): Promise<{ id_usuario: string; nombre: string; correo: string } | null> {
         const [rows]: [any[], any] = await pool.query(
             'SELECT id_usuario, nombre, correo FROM usuarios WHERE id_usuario = ?',
-            [userId]
+            [id_usuario]
         );
 
         if (rows.length === 0) {
@@ -92,28 +98,36 @@ export class UserRepository implements UserRepositoryPort {
 
         const user = rows[0];
 
-        await this.updateVerificationStatus(userId, 'confirmado', false);
+        await this.updateVerificationStatus(id_usuario, 'confirmado', false);
 
         return user;
     }
 
-    async updateVerificationStatus(
-        correoOrId: string,
-        status: 'pendiente' | 'confirmado',
-        searchByEmail: boolean
-    ): Promise<void> {
-        const query = searchByEmail
+    async updateVerificationStatus(id_usuario: string, status: 'pendiente' | 'confirmado', searchByEmail: boolean): Promise<void> {
+        console.log(`[DEBUG] Parámetros de actualización:
+            Correo/ID: ${id_usuario}
+            Nuevo Estado: ${status}
+            Buscar por Email: ${searchByEmail}`);
+
+            const query = searchByEmail
             ? `UPDATE usuarios SET estado_verificacion = ? WHERE correo = ?`
             : `UPDATE usuarios SET estado_verificacion = ? WHERE id_usuario = ?`;
 
-        const [result]: [any, any] = await pool.query(query, [status, correoOrId]);
+        try {
+            const [result]: [any, any] = await pool.query(query, [status, id_usuario]);
 
-        console.log(`Query ejecutada: ${query}`);
-        console.log(`Valores: status=${status}, correoOrId=${correoOrId}`);
-        console.log(`Resultado: affectedRows=${result.affectedRows}`);
+            console.log(`[DEBUG] Resultado de la actualización:
+                Query: ${query}
+                Filas afectadas: ${result.affectedRows}
+                Mensajes: ${result.message}`);
 
-        if (result.affectedRows === 0) {
-            throw new Error('Usuario no encontrado o estado no actualizado');
+            if (result.affectedRows === 0) {
+                console.error(`[ERROR] No se actualizó ninguna fila para: ${id_usuario}`);
+                throw new Error('Usuario no encontrado o estado no actualizado');
+            }
+        } catch (error) {
+            console.error(`[ERROR] Error en updateVerificationStatus:`, error);
+            throw error;
         }
     }
 

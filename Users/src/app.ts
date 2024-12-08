@@ -39,7 +39,7 @@ async function start() {
     try {
         await connect();
         app.listen(port, () => {
-            console.log(`Server running on port http://localhost:${port} 🚀`);
+            console.log(`Server running on port W ${port} 🚀`);
         });
     } catch (error) {
         console.error("Failed to start server due to database connection error:", error);

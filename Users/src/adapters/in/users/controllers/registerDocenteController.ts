@@ -29,7 +29,7 @@ export class RegisterDocenteController {
             try {
                 const channel = RabbitMQConnection.getChannel();
                 channel.publish(
-                    rabbitMQConfig.userExchange,
+                    rabbitMQConfig.notificationExchange,
                     '',
                     Buffer.from(
                         JSON.stringify({

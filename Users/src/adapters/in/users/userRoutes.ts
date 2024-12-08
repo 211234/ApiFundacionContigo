@@ -15,7 +15,8 @@ import {
     registerNiñoController,
     updateNiñoController,
     auditController,
-    confirmAccountController
+    confirmAccountController,
+    donationController
 } from './userDependencies';
 
 import {
@@ -161,6 +162,22 @@ router.get(
     '/v1/audit/:id',
     authMiddleware,
     (req, res) => auditController.getAuditLogById(req, res)
+);
+
+router.post(
+    '/v1/donations',
+    authMiddleware,
+    isPadreMiddleware,
+    (req: AuthRequest, res: Response, next: NextFunction) =>
+        donationController.createDonation(req, res, next)
+);
+
+router.post(
+    '/v1/donations/capture/:orderId',
+    authMiddleware,
+    isPadreMiddleware,
+    (req: AuthRequest, res: Response, next: NextFunction) =>
+        donationController.captureDonation(req, res, next)
 );
 
 export default router;

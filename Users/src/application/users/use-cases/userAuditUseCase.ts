@@ -78,7 +78,7 @@ export class UserAuditUseCase {
         console.log("Audit log created successfully in logoutUser");
     }
     async updateUserVerificationStatus(id_usuario: string, data: any) {
-        const updatedUser = await this.userService.updateVerificationStatus(id_usuario, data);
+        const updatedUser = await this.userService.updateVerificationStatus(id_usuario, data.status, data.searchByEmail);
         await this.auditService.createAuditLog({
             id_usuario,
             accion: 'ACTUALIZAR_ESTADO_VERIFICACION',

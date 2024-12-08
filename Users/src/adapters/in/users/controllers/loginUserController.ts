@@ -16,6 +16,11 @@ export class LoginUserController {
         try {
             const user = await this.loginUserUseCase.execute({ correo, password });
 
+            if (user.estado_verificacion !== 'confirmado') {
+                res.status(403).json({ message: 'Cuenta no confirmada' });
+                return;
+            }
+
             const isPasswordValid = await bcrypt.compare(password, user.password);
             if (!isPasswordValid) {
                 res.status(401).json({ message: 'Invalid password' });

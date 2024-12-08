@@ -5,6 +5,7 @@ import { User } from '../domain/userEntity';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { AuditService } from './auditService';
+import { pool } from '../../../infrastructure/config/database';
 
 export class UserService {
     constructor(
@@ -46,14 +47,14 @@ export class UserService {
     }
 
     // Buscar un usuario por ID
-    async findUserById(id: string): Promise<User | null> {
-        return await this.userRepository.findById(id);
+    async findUserById(id_usuario: string): Promise<User | null> {
+        return await this.userRepository.findById(id_usuario);
     }
 
-    async verifyUser(idOrEmail: string, searchByEmail = false): Promise<void> {
+    async verifyUser(id_usuario: string, searchByEmail = false): Promise<void> {
         const user = searchByEmail
-            ? await this.userRepository.findByEmail(idOrEmail)
-            : await this.userRepository.findById(idOrEmail);
+            ? await this.userRepository.findByEmail(id_usuario)
+            : await this.userRepository.findById(id_usuario);
 
         if (!user) {
             throw new Error('Usuario no encontrado');
@@ -63,56 +64,49 @@ export class UserService {
             throw new Error('El usuario ya está confirmado');
         }
 
-        await this.updateVerificationStatus(idOrEmail, 'confirmado', searchByEmail);
-        console.log(`Usuario ${idOrEmail} confirmado exitosamente.`);
+        await this.updateVerificationStatus(id_usuario, 'confirmado', searchByEmail);
+        console.log(`Usuario ${id_usuario} confirmado exitosamente.`);
     }
 
     // Actualizar estado de verificación del usuario
-    async updateVerificationStatus(
-        idOrEmail: string,
-        status: 'pendiente' | 'confirmado',
-        searchByEmail = false
-    ): Promise<void> {
-        console.log('Buscando usuario con', searchByEmail ? `correo: ${idOrEmail}` : `id: ${idOrEmail}`);
+    async updateVerificationStatus(id_usuario: string, status: 'pendiente' | 'confirmado', searchByEmail = false): Promise<void> {
+        console.log(`[DEBUG] Iniciando actualización de estado:
+            ID/Correo: ${id_usuario}
+            Nuevo estado: ${status}
+            Buscar por Email: ${searchByEmail}`);
 
-        if (searchByEmail) {
-            const user = await this.userRepository.findByEmail(idOrEmail);
-            if (!user) throw new Error('Usuario no encontrado');
-            idOrEmail = user.id_usuario;
+        const query = searchByEmail
+            ? `UPDATE usuarios SET estado_verificacion = ? WHERE correo = ?`
+            : `UPDATE usuarios SET estado_verificacion = ? WHERE id_usuario = ?`;
+
+        const [result]: [any, any] = await pool.query(query, [status, id_usuario]);
+
+        console.log(`[DEBUG] Resultado de la actualización:
+            Filas afectadas: ${result.affectedRows}`);
+
+        if (result.affectedRows === 0) {
+            console.error(`[ERROR] No se actualizó ninguna fila. Verifica que el usuario existe.`);
+            throw new Error('Usuario no encontrado o estado no actualizado');
         }
-
-        // Llama al repositorio para actualizar el estado
-        await this.userRepository.updateVerificationStatus(idOrEmail, status, searchByEmail);
-
-        console.log(`Estado de verificación actualizado a ${status} para ${idOrEmail}`);
-
-        // Registrar en auditoría
-        await this.auditService.createAuditLog({
-            id_usuario: idOrEmail, // Si usas correo, ajusta para buscar ID
-            accion: 'ACTUALIZAR_ESTADO_VERIFICACION',
-            entidad_afectada: 'usuarios',
-            id_entidad: idOrEmail,
-        });
     }
 
-
     // Actualizar un usuario
-    async updateUser(id: string, updateUserDTO: UpdateUserDTO): Promise<User | null> {
+    async updateUser(id_usuario: string, updateUserDTO: UpdateUserDTO): Promise<User | null> {
         // Buscar al usuario
-        const user = await this.userRepository.findById(id);
+        const user = await this.userRepository.findById(id_usuario);
         if (!user) {
             throw new Error('User not found');
         }
 
         // Actualizar el usuario
-        const updatedUser = await this.userRepository.updateUser(id, updateUserDTO);
+        const updatedUser = await this.userRepository.updateUser(id_usuario, updateUserDTO);
 
         // Registrar auditoría para la actualización del usuario
         await this.auditService.createAuditLog({
-            id_usuario: id,
+            id_usuario: id_usuario,
             accion: 'ACTUALIZAR',
             entidad_afectada: 'usuarios',
-            id_entidad: id,
+            id_entidad: id_usuario
         });
 
         return updatedUser;
@@ -144,7 +138,7 @@ export class UserService {
             id_entidad: id_usuario,
         });
     }
-    
+
     async logoutUser(id_usuario: string) {
         await this.auditService.createAuditLog({
             id_usuario,

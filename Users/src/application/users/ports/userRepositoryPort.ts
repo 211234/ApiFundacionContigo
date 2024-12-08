@@ -2,7 +2,7 @@ import { User } from '../../../core/users/domain/userEntity';
 import { UpdateUserDTO } from '../../../adapters/in/users/dtos/updateUserDto';
 
 export interface UserRepositoryPort {
-    confirmUser(userId: string): Promise<{ id_usuario: string; nombre: string; correo: string } | null>;
+    confirmUser(id_usuario: string): Promise<{ id_usuario: string; nombre: string; correo: string } | null>;
     findById(id_usuario: string): Promise<User | null>;
     findByEmail(correo: string): Promise<User | null>;
     isEmpty(): Promise<boolean>;

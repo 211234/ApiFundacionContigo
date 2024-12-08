@@ -11,22 +11,27 @@ export class ConfirmAccountController {
     async handle(req: Request, res: Response, next: NextFunction): Promise<void> {
         const { correo, codigo } = req.body;
     
+        console.log(`[DEBUG] Confirmación de cuenta para: ${correo}`);
+        console.log(`[DEBUG] Código recibido: ${codigo}`);
+    
         try {
             const tokenData = await this.tokenService.validateConfirmationToken(correo, codigo);
     
-            if (!tokenData || !tokenData.correo) {
-                res.status(400).json({ message: 'Código de confirmación inválido o expirado' });
-                return;
-            }
+            // Asegurarse de imprimir tokenData de manera clara
+            console.log(`[DEBUG] Resultado completo de validación token:`, JSON.stringify(tokenData));
     
-            // Actualiza el estado utilizando el correo
+            console.log(`[DEBUG] Token válido, procediendo con la confirmación`);
+    
+            console.log(`[DEBUG] Actualizando estado de verificación para: ${correo}`);
             await this.userService.updateVerificationStatus(correo, 'confirmado', true);
-
+            console.log(`[DEBUG] Estado de verificación actualizado`);
     
-            res.status(200).json({ message: 'Cuenta confirmada y lead eliminado exitosamente' });
+            res.status(200).json({ message: 'Cuenta confirmada exitosamente' });
+    
+            return;
         } catch (error) {
-            console.error('Error al confirmar cuenta:', error);
+            console.error('[ERROR] Error en confirmación de cuenta:', error);
             next(error);
         }
-    }
+    }    
 }

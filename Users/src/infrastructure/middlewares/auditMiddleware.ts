@@ -5,15 +5,13 @@ import { UserService } from '../../core/users/services/servicesUser';
 import { UserRepository } from '../../adapters/out/database/users/userRepository';
 import { AuditRepository } from '../../adapters/out/database/users/auditRepository';
 import { pool } from '../config/database';
-import { LeadRepository } from '../../adapters/out/database/lead/leadRepository';
 import { AuthRequest } from '../../interfaces/authRequest';
 
 // Repositorios y servicios
 const userRepository = new UserRepository();
 const auditRepository = new AuditRepository(pool, userRepository);
 const auditService = new AuditService(auditRepository);
-const leadRepository = new LeadRepository();
-const userService = new UserService(userRepository, auditService, leadRepository);
+const userService = new UserService(userRepository, auditService);
 const userAuditUseCase = new UserAuditUseCase(userService, auditService);
 
 
