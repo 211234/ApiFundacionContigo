@@ -8,7 +8,7 @@ import alimentosRoutes from './adapters/in/alimentos/alimentosRoutes';
 import actividadRoutes from './adapters/in/actividades/actividadRoutes';
 import { RabbitMQConnection } from '../src/infrastructure/config/rabbitMQ';
 import { connect } from './infrastructure/config/database';
-
+import { env } from './infrastructure/config/env';
 
 dotenv.config();
 
