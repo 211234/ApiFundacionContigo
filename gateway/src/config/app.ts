@@ -3,7 +3,7 @@ import proxy from "express-http-proxy";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import cors from "cors";
-import { env } from "./_config/env.config";
+import { env } from "./env";
 
 const app = express();
 const port = env.port.PORT;
